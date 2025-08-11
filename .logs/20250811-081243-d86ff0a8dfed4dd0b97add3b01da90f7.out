@@ -1,2 +1,0 @@
-lib/types.ts(70,5): error TS2687: All declarations of 'role' must have identical modifiers.
-exit_code=2

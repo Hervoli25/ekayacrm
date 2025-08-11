@@ -1,9 +1,0 @@
-[master 09b8351] Authentication Portal Complete
- 14 files changed, 749 insertions(+), 158 deletions(-)
- rewrite .abacus.donotdelete (99%)
- create mode 100644 app/app/auth/register/page.tsx
- rewrite app/components/auth/signin-form.tsx (65%)
- create mode 100644 app/components/auth/signup-form.tsx
- create mode 100644 app/components/ui/role-badge.tsx
- create mode 100644 app/lib/permissions.ts
-###09b8351cd411c5a39491f81afea90807e4ac3aea###

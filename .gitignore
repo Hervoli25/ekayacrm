@@ -25,6 +25,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Augment/System logs
+.logs/
+**/.logs/
+
+# System files
+.abacus.donotdelete
+
 # Environment variables (never commit secrets)
 .env
 .env.*

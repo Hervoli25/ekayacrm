@@ -1,8 +1,0 @@
- ⨯ Error: [next-auth]: `useSession` must be wrapped in a <SessionProvider />
-    at useSession (/home/ubuntu/ekhaya_hr_app/app/.next/server/vendor-chunks/next-auth.js:489:11)
-    at DashboardLayout (/home/ubuntu/ekhaya_hr_app/app/.next/server/app/dashboard/page.js:328:98)
-digest: "3736371600"
- ⨯ Error: [next-auth]: `useSession` must be wrapped in a <SessionProvider />
-    at useSession (/home/ubuntu/ekhaya_hr_app/app/.next/server/vendor-chunks/next-auth.js:489:11)
-    at DashboardLayout (/home/ubuntu/ekhaya_hr_app/app/.next/server/app/dashboard/page.js:328:98)
-digest: "3736371600"
