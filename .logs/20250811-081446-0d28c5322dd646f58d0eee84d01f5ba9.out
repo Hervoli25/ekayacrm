@@ -1,0 +1,283 @@
+  ▲ Next.js 14.2.28
+  - Local:        http://localhost:3000
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+ ✓ Starting...
+ ✓ Ready in 1886ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.6s (789 modules)
+ GET / 307 in 3122ms
+ ✓ Compiled in 461ms (282 modules)
+ ○ Compiling /auth/signin ...
+ ✓ Compiled /auth/signin in 1879ms (882 modules)
+ GET /auth/signin 200 in 2055ms
+ GET / 307 in 58ms
+ GET /auth/signin 200 in 37ms
+ ✓ Compiled /api/auth/[...nextauth] in 185ms (572 modules)
+ GET /api/auth/session 200 in 606ms
+ GET /api/auth/session 200 in 41ms
+ GET / 307 in 78ms
+ GET /auth/signin 200 in 53ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 41ms
+ GET / 307 in 42ms
+ GET /auth/signin 200 in 39ms
+ GET /api/auth/session 200 in 41ms
+ GET /api/auth/session 200 in 23ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 29ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 36ms
+ ○ Compiling /auth/register ...
+ ✓ Compiled /auth/register in 1149ms (1041 modules)
+ GET /auth/register?_rsc=k97oo 200 in 50ms
+ GET / 307 in 71ms
+ GET /auth/signin 200 in 47ms
+ GET / 307 in 44ms
+ GET /auth/signin 200 in 40ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 37ms
+ GET / 307 in 40ms
+ GET /auth/signin 200 in 34ms
+ GET / 307 in 45ms
+ GET /auth/signin 200 in 42ms
+ GET / 307 in 41ms
+ GET /auth/signin 200 in 33ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 39ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 35ms
+ GET / 307 in 40ms
+ GET /auth/signin 200 in 36ms
+ GET / 307 in 44ms
+ GET /auth/signin 200 in 34ms
+ GET / 307 in 41ms
+ GET /auth/signin 200 in 39ms
+ GET / 307 in 44ms
+ GET /auth/signin 200 in 36ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 33ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 33ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 34ms
+ ✓ Compiled /api/auth/[...nextauth] in 209ms (572 modules)
+ GET /api/auth/providers 200 in 335ms
+ GET /api/auth/csrf 200 in 31ms
+ POST /api/auth/callback/credentials 200 in 393ms
+ GET /api/auth/session 200 in 36ms
+ GET /api/auth/session 200 in 34ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1102ms (1161 modules)
+ ✓ Compiled /api/employees in 253ms (731 modules)
+ ✓ Compiled (733 modules)
+ GET /api/leave-requests 200 in 510ms
+ GET /api/employees 200 in 511ms
+ GET /api/leave-requests 200 in 30ms
+ GET /api/employees 200 in 25ms
+ GET /api/leave-requests 200 in 26ms
+ GET /api/leave-requests 200 in 29ms
+ GET / 307 in 77ms
+ GET /auth/signin 200 in 56ms
+ ○ Compiling /employees ...
+ ✓ Compiled /employees in 534ms (1238 modules)
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 34ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 27ms
+ ○ Compiling /leave-requests ...
+ ✓ Compiled /leave-requests in 564ms (1271 modules)
+ GET /api/leave-requests?status=all 200 in 36ms
+ GET /api/leave-requests?status=all 200 in 27ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 31ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 24ms
+ GET / 307 in 55ms
+ GET /auth/signin 200 in 47ms
+ GET /api/employees 200 in 28ms
+ GET /api/leave-requests 200 in 27ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/employees 200 in 25ms
+ GET /api/leave-requests 200 in 23ms
+ GET /api/leave-requests 200 in 25ms
+ GET / 307 in 42ms
+ GET /auth/signin 200 in 35ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 29ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 28ms
+ GET /api/employees?search=&sortBy=title&sortOrder=asc 200 in 28ms
+ GET /api/employees?search=&sortBy=department&sortOrder=asc 200 in 31ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 40ms
+ GET /api/leave-requests?status=all 200 in 29ms
+ GET /api/leave-requests?status=all 200 in 28ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 32ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 35ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 36ms
+ GET / 307 in 47ms
+ GET /auth/signin 200 in 37ms
+ GET / 307 in 41ms
+ GET /auth/signin 200 in 32ms
+ GET / 307 in 36ms
+ GET /auth/signin 200 in 36ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 31ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 35ms
+ GET / 307 in 39ms
+ GET /auth/signin 200 in 31ms
+ GET / 307 in 37ms
+ GET /auth/signin 200 in 34ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 32ms
+ GET /api/leave-requests?status=all 200 in 42ms
+ GET /api/leave-requests?status=all 200 in 25ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 30ms
+ POST /api/leave-requests 201 in 38ms
+ GET /api/leave-requests?status=all 200 in 30ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 30ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 28ms
+ GET / 307 in 39ms
+ GET /api/leave-requests 200 in 30ms
+ GET /api/employees 200 in 29ms
+ GET /auth/signin 200 in 29ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/employees 200 in 23ms
+ GET /api/leave-requests 200 in 27ms
+ GET /api/leave-requests 200 in 33ms
+ GET / 307 in 42ms
+ GET /auth/signin 200 in 37ms
+ GET / 307 in 32ms
+ GET /auth/signin 200 in 34ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 35ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 37ms
+ GET / 307 in 38ms
+ GET /auth/signin 200 in 39ms
+ GET / 307 in 40ms
+ GET /auth/signin 200 in 33ms
+ GET / 307 in 40ms
+ GET /auth/signin 200 in 33ms
+ ✓ Compiled in 504ms (500 modules)
+ ✓ Compiled in 265ms (500 modules)
+ ✓ Compiled in 311ms (500 modules)
+ ✓ Compiled in 251ms (500 modules)
+ ✓ Compiled in 258ms (500 modules)
+ ✓ Compiled in 399ms (500 modules)
+ ✓ Compiled in 250ms (500 modules)
+ ✓ Compiled in 465ms (500 modules)
+ ✓ Compiled in 364ms (487 modules)
+ ✓ Compiled in 406ms (496 modules)
+ ✓ Compiled in 280ms (496 modules)
+ ✓ Compiled in 317ms (494 modules)
+ ✓ Compiled in 256ms (494 modules)
+ ✓ Compiled in 596ms (500 modules)
+ ✓ Compiled in 370ms (500 modules)
+ ✓ Compiled in 264ms (500 modules)
+ ✓ Compiled in 292ms (500 modules)
+ ✓ Compiled in 290ms (500 modules)
+ ✓ Compiled in 379ms (500 modules)
+ ✓ Compiled in 566ms (500 modules)
+ ✓ Compiled in 294ms (497 modules)
+ ✓ Compiled in 459ms (502 modules)
+ ✓ Compiled in 333ms (502 modules)
+ ✓ Compiled in 348ms (502 modules)
+ ✓ Compiled in 292ms (502 modules)
+ ✓ Compiled in 268ms (502 modules)
+ ✓ Compiled in 260ms (502 modules)
+ ✓ Compiled in 305ms (502 modules)
+ ✓ Compiled in 246ms (502 modules)
+ ✓ Compiled / in 297ms (507 modules)
+ GET / 307 in 438ms
+ ✓ Compiled /auth/signin in 182ms (566 modules)
+ GET /auth/signin 200 in 318ms
+ GET / 307 in 48ms
+ ✓ Compiled /dashboard in 499ms (713 modules)
+ GET /dashboard 200 in 672ms
+ ✓ Compiled /api/auth/[...nextauth] in 273ms (719 modules)
+ GET /api/auth/session 200 in 400ms
+ GET /api/auth/session 200 in 30ms
+ ✓ Compiled /api/dashboard/stats in 273ms (754 modules)
+ GET /api/dashboard/stats?range=thisMonth 500 in 431ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 33ms
+ GET / 307 in 77ms
+ GET /dashboard 200 in 42ms
+ GET /api/auth/session 200 in 56ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 31ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 28ms
+ ✓ Compiled /employees in 305ms (782 modules)
+ GET / 307 in 57ms
+ ✓ Compiled /api/employees in 190ms (784 modules)
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 259ms
+ GET /auth/signin 200 in 117ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 36ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 29ms
+ GET / 307 in 45ms
+ GET /auth/signin 200 in 39ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 34ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 31ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 27ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 29ms
+ ✓ Compiled /leave-requests in 301ms (794 modules)
+ ✓ Compiled /api/leave-requests in 237ms (796 modules)
+ GET /api/employees 200 in 497ms
+ GET /api/leave-requests? 500 in 518ms
+ GET /api/employees 200 in 31ms
+ GET /api/leave-requests? 500 in 32ms
+ GET /api/auth/csrf 200 in 41ms
+ POST /api/auth/signout 200 in 24ms
+ GET /leave-requests 200 in 48ms
+ GET /api/auth/session 200 in 35ms
+ GET /api/auth/session 200 in 25ms
+ GET /auth/signin?_rsc=qs0xg 200 in 35ms
+ GET / 307 in 45ms
+ GET /auth/signin 200 in 45ms
+ GET /api/auth/providers 200 in 39ms
+ GET /api/auth/csrf 200 in 24ms
+ POST /api/auth/callback/credentials 200 in 314ms
+ GET /api/auth/session 200 in 38ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 39ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 31ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 27ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 28ms
+ GET /api/employees 200 in 29ms
+ GET /api/leave-requests? 500 in 30ms
+ GET /api/leave-requests? 500 in 33ms
+ GET /api/employees 200 in 35ms
+ GET / 307 in 41ms
+ GET /auth/signin 200 in 37ms
+ POST /api/leave-requests 400 in 28ms
+ POST /api/leave-requests 400 in 34ms
+ GET / 307 in 43ms
+ GET /auth/signin 200 in 38ms
+ POST /api/leave-requests 500 in 33ms
+ POST /api/leave-requests 500 in 32ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 538ms (1261 modules)
+ GET /_next/static/chunks/app/index.mjs.map 404 in 115ms
+ GET /_next/static/chunks/app/employees/bundle-mjs.mjs.map 404 in 114ms
+ GET /_next/static/chunks/app/dashboard/bundle-mjs.mjs.map 404 in 116ms
+ GET /_next/static/chunks/app/leave-requests/bundle-mjs.mjs.map 404 in 654ms
+ GET /_next/static/chunks/app/auth/signin/bundle-mjs.mjs.map 404 in 114ms
+ GET /_next/static/chunks/handle-smooth-scroll.js.map 404 in 107ms
+ GET /_next/static/chunks/static-generation-async-storage-instance.js.map 404 in 16ms
+ GET / 307 in 56ms
+ GET /auth/signin 200 in 50ms
+ GET / 307 in 40ms
+ GET / 307 in 45ms
+ GET /auth/signin 200 in 40ms
+ ✓ Compiled /dashboard in 227ms (742 modules)
+ GET /dashboard 200 in 315ms
+ GET / 307 in 49ms
+ GET /dashboard 200 in 40ms
+ ✓ Compiled /api/auth/[...nextauth] in 163ms (746 modules)
+ GET /api/auth/session 200 in 246ms
+ GET /api/auth/session 200 in 35ms
+ ✓ Compiled /api/dashboard/stats in 186ms (757 modules)
+ GET /api/dashboard/stats?range=thisMonth 500 in 246ms
+ GET /api/dashboard/stats?range=thisMonth 500 in 39ms
+ GET / 307 in 58ms
+ GET /auth/signin 200 in 49ms

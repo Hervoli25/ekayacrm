@@ -1,0 +1,22 @@
+app/dashboard/page.tsx(2,8): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+app/dashboard/page.tsx(2,8): error TS2440: Import declaration conflicts with local declaration of 'dynamic'.
+app/dashboard/page.tsx(4,25): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
+app/dashboard/page.tsx(4,25): error TS2448: Block-scoped variable 'dynamic' used before its declaration.
+app/dashboard/page.tsx(4,25): error TS2454: Variable 'dynamic' is used before being assigned.
+app/dashboard/page.tsx(13,14): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+app/employees/page.tsx(2,8): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+app/employees/page.tsx(2,8): error TS2440: Import declaration conflicts with local declaration of 'dynamic'.
+app/employees/page.tsx(4,25): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
+app/employees/page.tsx(4,25): error TS2448: Block-scoped variable 'dynamic' used before its declaration.
+app/employees/page.tsx(4,25): error TS2454: Variable 'dynamic' is used before being assigned.
+app/employees/page.tsx(13,14): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+app/leave-requests/page.tsx(2,8): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+app/leave-requests/page.tsx(2,8): error TS2440: Import declaration conflicts with local declaration of 'dynamic'.
+app/leave-requests/page.tsx(4,29): error TS2349: This expression is not callable.
+  Type 'String' has no call signatures.
+app/leave-requests/page.tsx(4,29): error TS2448: Block-scoped variable 'dynamic' used before its declaration.
+app/leave-requests/page.tsx(4,29): error TS2454: Variable 'dynamic' is used before being assigned.
+app/leave-requests/page.tsx(13,14): error TS2395: Individual declarations in merged declaration 'dynamic' must be all exported or all local.
+exit_code=2

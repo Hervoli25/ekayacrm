@@ -1,0 +1,114 @@
+  ▲ Next.js 14.2.28
+  - Local:        http://localhost:3000
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+ ✓ Starting...
+ ✓ Ready in 2s
+ ○ Compiling / ...
+ ✓ Compiled / in 2.8s (796 modules)
+ GET / 307 in 3289ms
+ ✓ Compiled in 474ms (282 modules)
+ ✓ Compiled /api/auth/[...nextauth] in 246ms (513 modules)
+ GET /api/auth/providers 200 in 664ms
+ GET / 307 in 72ms
+ ○ Compiling /auth/signin ...
+ ✓ Compiled /auth/signin in 593ms (838 modules)
+ GET /auth/signin 200 in 714ms
+ GET /api/auth/session 200 in 46ms
+ GET /api/auth/session 200 in 25ms
+ GET /api/auth/csrf 200 in 34ms
+ ✓ Compiled /api/signup in 227ms (568 modules)
+ POST /api/signup 201 in 663ms
+ GET / 307 in 69ms
+ GET /auth/signin 200 in 42ms
+ GET /api/auth/csrf 200 in 41ms
+ POST /api/auth/callback/credentials 302 in 304ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1165ms (1164 modules)
+ GET /dashboard 200 in 1329ms
+ GET /dashboard 200 in 37ms
+ GET / 307 in 60ms
+ GET /dashboard 200 in 40ms
+ GET /api/auth/session 200 in 46ms
+ GET /api/auth/session 200 in 27ms
+ GET /api/auth/session 200 in 26ms
+ ✓ Compiled /api/employees in 224ms (724 modules)
+ ✓ Compiled (733 modules)
+ GET /api/finance/receipts 200 in 606ms
+ GET /api/employees 200 in 586ms
+ GET /api/auth/session 200 in 561ms
+ GET /api/finance/analytics?period=30 200 in 616ms
+ GET /api/finance/expenses 200 in 602ms
+ GET /api/leave-requests 200 in 612ms
+ GET /api/finance/receipts 200 in 42ms
+ GET /api/auth/session 200 in 47ms
+ GET /api/employees 200 in 55ms
+ GET /api/finance/analytics?period=30 200 in 59ms
+ GET /api/leave-requests 200 in 56ms
+ GET /api/finance/expenses 200 in 42ms
+ GET /api/finance/receipts 200 in 25ms
+ GET /api/employees 200 in 59ms
+ GET /api/leave-requests 200 in 60ms
+ GET /api/finance/analytics?period=30 200 in 60ms
+ GET /api/finance/expenses 200 in 63ms
+ GET /api/finance/receipts 200 in 29ms
+ GET /api/leave-requests 200 in 32ms
+ GET /api/employees 200 in 42ms
+ GET /api/finance/analytics?period=30 200 in 41ms
+ GET /api/finance/expenses 200 in 28ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/leave-requests 200 in 21ms
+ ○ Compiling /finance ...
+ ✓ Compiled /finance in 2.9s (2508 modules)
+ GET /employees 200 in 3176ms
+ GET /leave-requests 200 in 3159ms
+ GET /finance 200 in 3161ms
+ GET /finance/reports 200 in 3172ms
+ GET /finance/receipts 200 in 3168ms
+ GET /api/auth/session 200 in 62ms
+ GET /api/auth/session 200 in 24ms
+ GET /api/leave-requests?status=all 200 in 27ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/leave-requests?status=all 200 in 25ms
+ GET /api/auth/session 200 in 22ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 28ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 23ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 32ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/finance/analytics?period=30 200 in 30ms
+ GET /api/auth/session 200 in 22ms
+ ✓ Compiled /api/finance/daily-report in 318ms (1409 modules)
+ GET /api/auth/session 200 in 667ms
+ GET /api/finance/daily-report 200 in 704ms
+ GET /api/finance/analytics?period=30 200 in 698ms
+ GET /api/auth/session 200 in 30ms
+ GET /api/finance/daily-report 200 in 32ms
+ GET /api/auth/session 200 in 22ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 48ms
+ GET /api/auth/session 200 in 28ms
+ GET /api/auth/session 200 in 24ms
+ GET /api/auth/session 200 in 22ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 35ms
+ GET /api/auth/session 200 in 22ms
+ ✓ Compiled /api/finance/employee-performance in 349ms (1411 modules)
+ GET /api/employees 200 in 767ms
+ GET /api/finance/employee-performance?startDate=2025-07-12&endDate=2025-08-11 200 in 785ms
+ GET /api/employees 200 in 22ms
+ GET /api/finance/employee-performance?startDate=2025-07-12&endDate=2025-08-11 200 in 23ms
+ ✓ Compiled in 800ms (2524 modules)
+ ✓ Compiled in 600ms (2524 modules)
+ ✓ Compiled in 657ms (2513 modules)
+ ✓ Compiled in 614ms (2513 modules)
+ ✓ Compiled in 535ms (2513 modules)
+ ✓ Compiled in 286ms (1113 modules)
+[?25h

@@ -1,0 +1,355 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(EMPLOYEE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  employee      Employee?
+  leaveRequests LeaveRequest[]
+  
+  // Finance relations
+  dailyReports         DailyReport[]
+  receipts             Receipt[]     @relation("EmployeeReceipts")
+  performanceRecords   EmployeePerformance[] @relation("EmployeePerformanceRecords")
+  createdExpenses      Expense[]     @relation("ExpenseCreator")
+  approvedExpenses     Expense[]     @relation("ExpenseApprover")
+  createdOrders        SupplyOrder[] @relation("OrderCreator")
+  receivedOrders       SupplyOrder[] @relation("OrderReceiver")
+
+  @@map("users")
+}
+
+model Employee {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  employeeId   String        @unique // Employee ID number
+  name         String
+  title        String
+  department   String
+  email        String        @unique
+  phone        String?
+  address      String?
+  emergencyContact String?
+  emergencyPhone   String?
+  salary       Decimal?      @db.Decimal(10,2)
+  hireDate     DateTime      @default(now())
+  status       EmployeeStatus @default(ACTIVE)
+  terminationDate DateTime?
+  terminationReason String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("employees")
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  userId      String
+  employeeId  String?     // For admin-created requests
+  startDate   DateTime
+  endDate     DateTime
+  leaveType   LeaveType
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  adminNotes  String?
+  approvedBy  String?
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  totalDays   Int?        // Calculated field
+  attachmentUrl String?   // For medical certificates, etc.
+  isHalfDay   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  SUPER_ADMIN      // The 4 directors from PDF - unlimited access
+  ADMIN            // System admins
+  HR_DIRECTOR      // HR Director role  
+  MANAGER          // Managers/Supervisors with limited access
+  EMPLOYEE         // Regular employees
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+  SUSPENDED
+}
+
+enum LeaveType {
+  VACATION
+  SICK_LEAVE
+  PERSONAL
+  EMERGENCY
+  MATERNITY
+  PATERNITY
+  BEREAVEMENT
+  STUDY_LEAVE
+  UNPAID_LEAVE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  MODIFIED
+}
+
+// Finance Management Models
+
+model DailyReport {
+  id                    String   @id @default(cuid())
+  date                  DateTime @unique
+  totalRevenue          Decimal  @default(0) @db.Decimal(10,2)
+  totalBookings         Int      @default(0)
+  newCustomers          Int      @default(0)
+  returningCustomers    Int      @default(0)
+  cashPayments          Decimal  @default(0) @db.Decimal(10,2)
+  cardPayments          Decimal  @default(0) @db.Decimal(10,2)
+  digitalPayments       Decimal  @default(0) @db.Decimal(10,2)
+  topPerformingService  String?
+  peakHour              String?
+  createdBy             String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [createdBy], references: [id])
+  services ServiceRevenue[]
+  employeePerformance EmployeePerformance[]
+
+  @@map("daily_reports")
+}
+
+model ServiceRevenue {
+  id            String   @id @default(cuid())
+  dailyReportId String
+  serviceName   String
+  revenue       Decimal  @db.Decimal(10,2)
+  bookingCount  Int
+  hour          Int?
+  createdAt     DateTime @default(now())
+
+  dailyReport DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+
+  @@map("service_revenue")
+}
+
+model Receipt {
+  id              String          @id @default(cuid())
+  receiptNumber   String          @unique
+  customerId      String?
+  customerName    String
+  customerEmail   String?
+  services        ReceiptService[]
+  subtotal        Decimal         @db.Decimal(10,2)
+  tax             Decimal         @db.Decimal(10,2)
+  total           Decimal         @db.Decimal(10,2)
+  paymentMethod   PaymentMethod
+  employeeId      String
+  status          ReceiptStatus   @default(COMPLETED)
+  printedAt       DateTime?
+  emailedAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  employee User @relation("EmployeeReceipts", fields: [employeeId], references: [id])
+
+  @@map("receipts")
+}
+
+model ReceiptService {
+  id        String  @id @default(cuid())
+  receiptId String
+  service   String
+  quantity  Int
+  price     Decimal @db.Decimal(8,2)
+  total     Decimal @db.Decimal(8,2)
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@map("receipt_services")
+}
+
+model EmployeePerformance {
+  id               String   @id @default(cuid())
+  dailyReportId    String
+  employeeId       String
+  servicesCompleted Int     @default(0)
+  revenue          Decimal  @default(0) @db.Decimal(10,2)
+  commission       Decimal  @default(0) @db.Decimal(8,2)
+  tips             Decimal  @default(0) @db.Decimal(8,2)
+  customerRating   Decimal? @db.Decimal(3,2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  dailyReport DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  employee    User        @relation("EmployeePerformanceRecords", fields: [employeeId], references: [id])
+
+  @@unique([dailyReportId, employeeId])
+  @@map("employee_performance")
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  date        DateTime
+  category    ExpenseCategory
+  description String
+  amount      Decimal     @db.Decimal(10,2)
+  paymentMethod PaymentMethod
+  receiptUrl  String?
+  approvedBy  String?
+  status      ExpenseStatus @default(PENDING)
+  createdBy   String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  creator   User  @relation("ExpenseCreator", fields: [createdBy], references: [id])
+  approver  User? @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+
+  @@map("expenses")
+}
+
+model InventoryItem {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  currentStock    Int      @default(0)
+  minimumStock    Int      @default(0)
+  unitCost        Decimal  @db.Decimal(8,2)
+  supplier        String?
+  lastRestocked   DateTime?
+  expirationDate  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders SupplyOrder[]
+
+  @@map("inventory_items")
+}
+
+model SupplyOrder {
+  id           String       @id @default(cuid())
+  itemId       String
+  quantity     Int
+  unitCost     Decimal      @db.Decimal(8,2)
+  totalCost    Decimal      @db.Decimal(10,2)
+  supplier     String
+  orderDate    DateTime     @default(now())
+  deliveryDate DateTime?
+  status       OrderStatus  @default(PENDING)
+  receivedBy   String?
+  createdBy    String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  item      InventoryItem @relation(fields: [itemId], references: [id])
+  creator   User          @relation("OrderCreator", fields: [createdBy], references: [id])
+  receiver  User?         @relation("OrderReceiver", fields: [receivedBy], references: [id])
+
+  @@map("supply_orders")
+}
+
+
+
+enum PaymentMethod {
+  CASH
+  CARD
+  DIGITAL_WALLET
+  BANK_TRANSFER
+}
+
+enum ReceiptStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum ExpenseCategory {
+  SUPPLIES
+  UTILITIES
+  MAINTENANCE
+  MARKETING
+  OFFICE
+  TRAVEL
+  TRAINING
+  OTHER
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING
+  ORDERED
+  DELIVERED
+  CANCELLED
+}

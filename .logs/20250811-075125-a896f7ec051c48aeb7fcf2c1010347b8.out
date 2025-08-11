@@ -1,0 +1,106 @@
+  ▲ Next.js 14.2.28
+  - Local:        http://localhost:3000
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+ ✓ Starting...
+ ✓ Ready in 1695ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1613ms (789 modules)
+ GET / 307 in 1885ms
+ ✓ Compiled in 430ms (282 modules)
+ ✓ Compiled /api/auth/[...nextauth] in 174ms (513 modules)
+ GET /api/auth/providers 200 in 579ms
+ GET / 307 in 83ms
+ ○ Compiling /auth/signin ...
+ ✓ Compiled /auth/signin in 735ms (838 modules)
+ GET /auth/signin 200 in 883ms
+ GET /api/auth/session 200 in 50ms
+ GET /api/auth/session 200 in 22ms
+ GET /api/auth/csrf 200 in 41ms
+ ✓ Compiled /api/signup in 272ms (568 modules)
+ POST /api/signup 201 in 715ms
+ GET / 307 in 70ms
+ GET /auth/signin 200 in 41ms
+ GET /api/auth/csrf 200 in 44ms
+ POST /api/auth/callback/credentials 302 in 292ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1107ms (1164 modules)
+ GET /dashboard 200 in 1257ms
+ GET / 307 in 51ms
+ GET /dashboard 200 in 48ms
+ GET /dashboard 200 in 37ms
+ GET /api/auth/session 200 in 47ms
+ GET /api/auth/session 200 in 32ms
+ ○ Compiling /api/finance/receipts ...
+ ✓ Compiled /api/finance/receipts in 1125ms (724 modules)
+ ✓ Compiled (733 modules)
+ GET /api/leave-requests 200 in 1595ms
+ GET /api/finance/receipts 200 in 1579ms
+ GET /api/employees 200 in 1601ms
+ GET /api/auth/session 200 in 1534ms
+ GET /api/finance/analytics?period=30 200 in 1604ms
+ GET /api/finance/expenses 200 in 1591ms
+ GET /api/leave-requests 200 in 43ms
+ GET /api/finance/receipts 200 in 54ms
+ GET /api/employees 200 in 59ms
+ GET /api/finance/expenses 200 in 61ms
+ GET /api/auth/session 200 in 57ms
+ GET /api/finance/analytics?period=30 200 in 70ms
+ GET /api/finance/receipts 200 in 26ms
+ GET /api/leave-requests 200 in 36ms
+ GET /api/employees 200 in 42ms
+ GET /api/finance/expenses 200 in 37ms
+ GET /api/auth/session 200 in 42ms
+ GET /api/finance/analytics?period=30 200 in 54ms
+ GET /api/finance/receipts 200 in 52ms
+ GET /api/leave-requests 200 in 54ms
+ GET /api/employees 200 in 47ms
+ GET /api/finance/expenses 200 in 46ms
+ GET /api/auth/session 200 in 52ms
+ GET /api/finance/analytics?period=30 200 in 47ms
+ GET /api/leave-requests 200 in 23ms
+ GET /api/leave-requests 200 in 24ms
+ GET /api/leave-requests 200 in 25ms
+ GET /api/leave-requests 200 in 24ms
+ ○ Compiling /finance/reports ...
+ ✓ Compiled /finance/reports in 4.4s (2508 modules)
+ GET /leave-requests 200 in 4645ms
+ GET /finance/receipts 200 in 4647ms
+ GET /finance/reports 200 in 4642ms
+ GET /employees 200 in 4668ms
+ GET /finance 200 in 4668ms
+ GET /api/auth/session 200 in 109ms
+ GET /api/auth/session 200 in 22ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 28ms
+ GET /api/auth/session 200 in 20ms
+ GET /api/employees?search=&sortBy=name&sortOrder=asc 200 in 27ms
+ GET /api/auth/session 200 in 60ms
+ GET /api/leave-requests?status=all 200 in 72ms
+ GET /api/auth/session 200 in 19ms
+ GET /api/leave-requests?status=all 200 in 21ms
+ GET /api/auth/session 200 in 24ms
+ GET /api/finance/analytics?period=30 200 in 32ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/finance/analytics?period=30 200 in 27ms
+ GET /api/auth/session 200 in 25ms
+ ✓ Compiled /api/finance/daily-report in 405ms (1409 modules)
+ GET /api/finance/daily-report 200 in 786ms
+ GET /api/auth/session 200 in 683ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/finance/daily-report 200 in 27ms
+ GET /api/auth/session 200 in 20ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/auth/session 200 in 21ms
+ GET /api/auth/session 200 in 33ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/auth/session 200 in 21ms
+ ✓ Compiled /api/finance/employee-performance in 305ms (1411 modules)
+ GET /api/employees 200 in 656ms
+ GET /api/finance/employee-performance?startDate=2025-07-12&endDate=2025-08-11 200 in 662ms
+ GET /api/finance/employee-performance?startDate=2025-07-12&endDate=2025-08-11 200 in 38ms
+ GET /api/employees 200 in 42ms
+[?25h

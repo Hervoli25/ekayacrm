@@ -1,0 +1,9 @@
+app/api/signup/route.ts(52,9): error TS2322: Type '{ userId: string; name: any; title: any; department: any; email: any; phone: any; }' is not assignable to type '(Without<EmployeeCreateInput, EmployeeUncheckedCreateInput> & EmployeeUncheckedCreateInput) | (Without<...> & EmployeeCreateInput)'.
+  Type '{ userId: string; name: any; title: any; department: any; email: any; phone: any; }' is not assignable to type 'Without<EmployeeCreateInput, EmployeeUncheckedCreateInput> & EmployeeUncheckedCreateInput'.
+    Property 'employeeId' is missing in type '{ userId: string; name: any; title: any; department: any; email: any; phone: any; }' but required in type 'EmployeeUncheckedCreateInput'.
+components/employees/employee-directory.tsx(173,11): error TS2322: Type 'import("/home/ubuntu/ekhaya_hr_app/app/lib/types").Employee | null' is not assignable to type 'Employee | null'.
+  Type 'Employee' is missing the following properties from type 'Employee': employeeId, status, user
+components/leave-requests/enhanced-leave-manager.tsx(183,11): error TS2783: 'action' is specified more than once, so this usage will be overwritten.
+components/leave-requests/enhanced-leave-manager.tsx(472,31): error TS2551: Property 'userId' does not exist on type 'LeaveRequest'. Did you mean 'user'?
+components/leave-requests/enhanced-leave-manager.tsx(484,31): error TS2551: Property 'userId' does not exist on type 'LeaveRequest'. Did you mean 'user'?
+exit_code=2
