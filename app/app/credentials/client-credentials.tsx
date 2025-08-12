@@ -1,13 +1,12 @@
-
 'use client';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { AdvancedEmployeeManagement } from '@/components/enterprise/advanced-employee-management';
+import { CredentialsManager } from '@/components/admin/credentials-manager';
 
-export default function ClientEmployees() {
+export default function ClientCredentials() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -15,6 +14,13 @@ export default function ClientEmployees() {
     if (status === 'loading') return;
     if (!session) {
       router.push('/auth/signin');
+      return;
+    }
+    
+    // Only SUPER_ADMIN can access credentials
+    if (session.user.role !== 'SUPER_ADMIN') {
+      router.push('/dashboard');
+      return;
     }
   }, [session, status, router]);
 
@@ -26,7 +32,7 @@ export default function ClientEmployees() {
     );
   }
 
-  if (!session) {
+  if (!session || session.user.role !== 'SUPER_ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -38,10 +44,7 @@ export default function ClientEmployees() {
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <AdvancedEmployeeManagement 
-            userRole={session?.user?.role as any} 
-            userDepartment="Trading" // This would come from user's actual department
-          />
+          <CredentialsManager />
         </main>
       </div>
     </DashboardLayout>

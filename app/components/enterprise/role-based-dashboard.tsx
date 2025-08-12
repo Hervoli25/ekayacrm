@@ -15,6 +15,8 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { showSuccess, showError, showLoading } from '@/lib/sweetalert';
 import Swal from 'sweetalert2';
+import { CredentialsManager } from '@/components/admin/credentials-manager';
+import { DirectorCreationForm } from '@/components/enterprise/director-creation-form';
 import {
   Users,
   Calendar,
@@ -100,9 +102,7 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
   const [loading, setLoading] = useState(true);
   const [createDirectorOpen, setCreateDirectorOpen] = useState(false);
   const [createDepartmentOpen, setCreateDepartmentOpen] = useState(false);
-  const [directorForm, setDirectorForm] = useState({ name: '', email: '', department: '' });
   const [departmentForm, setDepartmentForm] = useState({ name: '', code: '', description: '', budget: '' });
-  const [isCreatingDirector, setIsCreatingDirector] = useState(false);
   const [isCreatingDepartment, setIsCreatingDepartment] = useState(false);
   const [createSuccess, setCreateSuccess] = useState<{ type: 'director' | 'department', data?: any } | null>(null);
   const [systemStats, setSystemStats] = useState({
@@ -165,67 +165,6 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
     }
   };
 
-  const handleCreateDirector = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!directorForm.name || !directorForm.email || !directorForm.department) return;
-
-    setIsCreatingDirector(true);
-
-    // Show loading alert
-    showLoading('Creating Director Account...', 'Please wait while we set up the director profile');
-
-    try {
-      const response = await fetch('/api/admin/create-director', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(directorForm),
-      });
-
-      // Close loading alert
-      Swal.close();
-
-      // Check if response is ok first
-      if (!response.ok) {
-        let errorMessage = 'Failed to create director';
-        try {
-          const errorResult = await response.json();
-          errorMessage = errorResult.error || errorMessage;
-        } catch (parseError) {
-          console.error('Error parsing error response:', parseError);
-        }
-        await showError('Creation Failed', errorMessage);
-        return;
-      }
-
-      // Parse successful response
-      const result = await response.json();
-
-      if (result.success && result.director) {
-        setCreateSuccess({ type: 'director', data: result.director });
-        setDirectorForm({ name: '', email: '', department: '' });
-        setCreateDirectorOpen(false);
-
-        // Refresh stats
-        fetchDashboardStats();
-
-        // Show success with credentials
-        await showSuccess(
-          'Director Created Successfully!',
-          `Name: ${result.director.name}\nEmail: ${result.director.email}\nTemporary Password: ${result.director.tempPassword}\n\nPlease share these credentials securely with the new director.`
-        );
-      } else {
-        await showError('Creation Failed', result.error || 'Failed to create director');
-      }
-    } catch (error) {
-      console.error('Error creating director:', error);
-      Swal.close(); // Make sure loading is closed
-      await showError('Connection Error', 'Failed to create director. Please check your connection and try again.');
-    } finally {
-      setIsCreatingDirector(false);
-    }
-  };
 
   const handleCreateDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,9 +320,10 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 h-12 p-1 bg-gray-100 rounded-xl">
+        <TabsList className="grid w-full grid-cols-7 h-12 p-1 bg-gray-100 rounded-xl">
           <TabsTrigger value="overview" className="rounded-lg font-semibold">Overview</TabsTrigger>
           <TabsTrigger value="users" className="rounded-lg font-semibold">Users</TabsTrigger>
+          <TabsTrigger value="credentials" className="rounded-lg font-semibold">Credentials</TabsTrigger>
           <TabsTrigger value="system" className="rounded-lg font-semibold">System</TabsTrigger>
           <TabsTrigger value="hr" className="rounded-lg font-semibold">HR</TabsTrigger>
           <TabsTrigger value="finance" className="rounded-lg font-semibold">Finance</TabsTrigger>
@@ -471,59 +411,21 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
                 <p className="text-gray-600">Get your HR system up and running</p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Dialog open={createDirectorOpen} onOpenChange={setCreateDirectorOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <Plus className="h-5 w-5 mr-3" />
-                      Create Director Account
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Create Director Account</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateDirector} className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="director-name">Full Name</Label>
-                        <Input 
-                          id="director-name" 
-                          placeholder="Enter director's full name"
-                          value={directorForm.name}
-                          onChange={(e) => setDirectorForm({...directorForm, name: e.target.value})}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="director-email">Email</Label>
-                        <Input 
-                          id="director-email" 
-                          type="email" 
-                          placeholder="director@company.com"
-                          value={directorForm.email}
-                          onChange={(e) => setDirectorForm({...directorForm, email: e.target.value})}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="director-department">Department</Label>
-                        <Select value={directorForm.department} onValueChange={(value) => setDirectorForm({...directorForm, department: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select department" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Executive">Executive</SelectItem>
-                            <SelectItem value="Human Resources">Human Resources</SelectItem>
-                            <SelectItem value="Finance">Finance</SelectItem>
-                            <SelectItem value="Operations">Operations</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button type="submit" className="w-full" disabled={isCreatingDirector}>
-                        {isCreatingDirector ? 'Creating...' : 'Create Director'}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  onClick={() => setCreateDirectorOpen(true)}
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Plus className="h-5 w-5 mr-3" />
+                  Create Director Account
+                </Button>
+                
+                <DirectorCreationForm 
+                  isOpen={createDirectorOpen} 
+                  onClose={() => setCreateDirectorOpen(false)}
+                  onSuccess={() => {
+                    fetchDashboardStats();
+                  }}
+                />
 
                 <Dialog open={createDepartmentOpen} onOpenChange={setCreateDepartmentOpen}>
                   <DialogTrigger asChild>
@@ -693,6 +595,10 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="credentials" className="space-y-4">
+          <CredentialsManager />
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">

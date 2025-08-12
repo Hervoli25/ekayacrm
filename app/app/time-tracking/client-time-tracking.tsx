@@ -1,13 +1,12 @@
-
 'use client';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { AdvancedEmployeeManagement } from '@/components/enterprise/advanced-employee-management';
+import { TimeTrackingDashboard } from '@/components/time/time-tracking-dashboard';
 
-export default function ClientEmployees() {
+export default function ClientTimeTracking() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -36,14 +35,7 @@ export default function ClientEmployees() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50">
-        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <AdvancedEmployeeManagement 
-            userRole={session?.user?.role as any} 
-            userDepartment="Trading" // This would come from user's actual department
-          />
-        </main>
-      </div>
+      <TimeTrackingDashboard />
     </DashboardLayout>
   );
 }

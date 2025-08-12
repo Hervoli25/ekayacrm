@@ -140,6 +140,10 @@ model User {
   postedJobs           JobPosting[]         @relation("JobPoster")
   reviewedApplications Application[]        @relation("ApplicationReviewer")
 
+  // Temporary Credentials
+  temporaryCredentials TemporaryCredential[] @relation("EmployeeCredentials")
+  createdCredentials   TemporaryCredential[] @relation("CredentialCreator")
+
   @@map("users")
 }
 
@@ -1347,3 +1351,25 @@ enum NotificationType {
   ERROR
   REMINDER
 }
+
+// Temporary Credentials Log - for SUPER_ADMIN access
+model TemporaryCredential {
+  id           String   @id @default(cuid())
+  employeeId   String
+  employeeName String
+  email        String
+  tempPassword String
+  role         Role
+  createdBy    String
+  createdAt    DateTime @default(now())
+  isUsed       Boolean  @default(false)
+  usedAt       DateTime?
+  expiresAt    DateTime // Expires after 30 days
+  notes        String?
+
+  employee User @relation("EmployeeCredentials", fields: [employeeId], references: [id])
+  creator  User @relation("CredentialCreator", fields: [createdBy], references: [id])
+
+  @@map("temporary_credentials")
+}
+

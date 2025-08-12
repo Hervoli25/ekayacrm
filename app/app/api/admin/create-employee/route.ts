@@ -109,6 +109,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Log temporary credentials for SUPER_ADMIN access
+    await prisma.temporaryCredential.create({
+      data: {
+        employeeId: user.id,
+        employeeName: name,
+        email,
+        tempPassword,
+        role: role as any,
+        createdBy: session.user.id,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        notes: `Employee created by ${session.user.name || session.user.email}`
+      }
+    });
+
     return NextResponse.json({
       success: true,
       employee: {

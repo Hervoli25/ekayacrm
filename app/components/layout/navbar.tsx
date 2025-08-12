@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Building2, User, LogOut, Users, Calendar, DollarSign, BarChart3, Receipt, Menu, X } from 'lucide-react';
+import { Building2, User, LogOut, Users, Calendar, DollarSign, BarChart3, Receipt, Menu, X, Clock, BookOpen } from 'lucide-react';
 import { AnimatedBrand } from '@/components/ui/animated-brand';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -62,6 +62,8 @@ export function Navbar() {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Building2 },
     { name: 'Employees', href: '/employees', icon: Users },
+    { name: 'Time Tracking', href: '/time-tracking', icon: Clock },
+    { name: 'Onboarding', href: '/onboarding', icon: BookOpen },
     { name: 'Leave Requests', href: '/leave-requests', icon: Calendar },
     ...(['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') ? [
       { name: 'Finance', href: '/finance', icon: DollarSign },
