@@ -526,7 +526,7 @@ export default function ExpenseTracker() {
                     )}
                   </div>
 
-                  {session?.user?.role === 'ADMIN' && expense.status === 'PENDING' && (
+                  {['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') && expense.status === 'PENDING' && (
                     <div className="flex space-x-2">
                       <Button
                         size="sm"

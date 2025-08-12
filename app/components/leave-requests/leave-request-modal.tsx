@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   Select, 
   SelectContent, 
@@ -44,7 +43,7 @@ export function LeaveRequestModal({ isOpen, onClose }: LeaveRequestModalProps) {
     startDate: new Date(),
     endDate: new Date(),
     leaveType: 'VACATION' as LeaveType,
-    reason: '',
+    reason: 'Leave request', // Default reason since field is removed
   });
   const [loading, setLoading] = useState(false);
 
@@ -75,7 +74,7 @@ export function LeaveRequestModal({ isOpen, onClose }: LeaveRequestModalProps) {
           startDate: new Date(),
           endDate: new Date(),
           leaveType: 'VACATION' as LeaveType,
-          reason: '',
+          reason: 'Leave request', // Default reason since field is removed
         });
       } else {
         const error = await response.json();
@@ -173,18 +172,7 @@ export function LeaveRequestModal({ isOpen, onClose }: LeaveRequestModalProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reason">Reason *</Label>
-            <Textarea
-              id="reason"
-              value={formData.reason}
-              onChange={(e) => handleChange('reason', e.target.value)}
-              placeholder="Please provide a reason for your leave request..."
-              required
-              disabled={loading}
-              rows={3}
-            />
-          </div>
+
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>

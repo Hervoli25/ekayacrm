@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Mail, Lock, User, Phone, Briefcase, Building, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import toast from 'react-hot-toast';
+import { Mail, Lock, User, Phone, Briefcase, Building } from 'lucide-react';
+import { AnimatedBrand } from '@/components/ui/animated-brand';
+import { showSuccess, showError, showLoading } from '@/lib/sweetalert';
+import Swal from 'sweetalert2';
 
 export function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -41,20 +42,26 @@ export function SignUpForm() {
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
+      await showError('Password Mismatch', 'The passwords you entered do not match. Please try again.');
       return;
     }
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
       setIsLoading(false);
+      await showError('Weak Password', 'Password must be at least 6 characters long for security.');
       return;
     }
 
     if (!formData.role) {
       setError('Please select a role');
       setIsLoading(false);
+      await showError('Missing Information', 'Please select your role in the organization.');
       return;
     }
+
+    // Show loading alert
+    showLoading('Creating your account...', 'Please wait while we set up your profile');
 
     try {
       const response = await fetch('/api/signup', {
@@ -75,17 +82,29 @@ export function SignUpForm() {
 
       const data = await response.json();
 
+      // Close loading alert
+      Swal.close();
+
       if (!response.ok) {
         setError(data.error || 'Registration failed');
+        await showError('Registration Failed', data.error || 'Unable to create your account. Please try again.');
       } else {
-        toast.success('Account created successfully!');
-        
+        await showSuccess(
+          'Welcome to Ekhaya Intel Trading!',
+          'Your account has been created successfully. You can now sign in with your credentials.'
+        );
+
         // Redirect to sign in page after successful registration
-        toast.success('Please sign in with your new account');
         router.push('/auth/signin');
       }
     } catch (error) {
+      // Close loading alert
+      Swal.close();
       setError('An error occurred. Please try again.');
+      await showError(
+        'Connection Error',
+        'Unable to connect to the server. Please check your internet connection and try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -93,28 +112,15 @@ export function SignUpForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <Card className="shadow-lg">
-        <CardHeader className="space-y-1 pb-4">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-green-600 p-3 rounded-lg">
-              <Building2 className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl text-center font-semibold text-gray-900">
-            Join Ekhaya Intel Trading
-          </CardTitle>
-          <CardDescription className="text-center text-gray-600">
+      <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+        <CardHeader className="space-y-6 pb-6">
+          <AnimatedBrand size="md" showIcon={true} />
+          <CardDescription className="text-center text-gray-600 font-medium">
             Create your HR Management System account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <CardContent className="space-y-6">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Email */}
@@ -155,7 +161,7 @@ export function SignUpForm() {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+                <Label htmlFor="password" className="text-gray-700 font-medium">Password *</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -165,15 +171,16 @@ export function SignUpForm() {
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     required
-                    className="pl-10"
+                    className="pl-10 h-12 border-gray-300 focus:border-red-500 focus:ring-red-500 rounded-lg"
                     disabled={isLoading}
+                    showPasswordToggle={true}
                   />
                 </div>
               </div>
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password *</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -183,8 +190,9 @@ export function SignUpForm() {
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     required
-                    className="pl-10"
+                    className="pl-10 h-12 border-gray-300 focus:border-red-500 focus:ring-red-500 rounded-lg"
                     disabled={isLoading}
+                    showPasswordToggle={true}
                   />
                 </div>
               </div>

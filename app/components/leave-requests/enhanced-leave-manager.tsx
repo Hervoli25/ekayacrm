@@ -39,6 +39,7 @@ import {
 import { Role } from '@prisma/client';
 import { format, differenceInDays } from 'date-fns';
 import toast from 'react-hot-toast';
+import { showDeleteConfirmation } from '@/lib/sweetalert';
 
 interface LeaveRequest {
   id: string;
@@ -100,7 +101,7 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
     startDate: '',
     endDate: '',
     leaveType: '',
-    reason: '',
+    reason: 'Leave request', // Default reason since field is removed
     isHalfDay: false,
   });
   const [actionData, setActionData] = useState({
@@ -144,10 +145,11 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
       const data = await response.json();
       
       if (response.ok) {
-        setEmployees(data || []);
+        setEmployees(data.employees || []);
       }
     } catch (error) {
       console.error('Error fetching employees:', error);
+      setEmployees([]);
     }
   };
 
@@ -203,7 +205,8 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
   };
 
   const handleDeleteLeave = async (requestId: string) => {
-    if (!confirm('Are you sure you want to delete this leave request?')) {
+    const result = await showDeleteConfirmation('this leave request');
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -230,7 +233,7 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
       startDate: '',
       endDate: '',
       leaveType: '',
-      reason: '',
+      reason: 'Leave request', // Default reason since field is removed
       isHalfDay: false,
     });
     setActionData({
@@ -594,16 +597,7 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
               <Label htmlFor="halfDay" className="text-sm">Half day leave</Label>
             </div>
             
-            <div>
-              <Label htmlFor="reason">Reason</Label>
-              <Textarea
-                id="reason"
-                placeholder="Please provide a reason for your leave request"
-                value={formData.reason}
-                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                rows={3}
-              />
-            </div>
+
             
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
@@ -679,16 +673,7 @@ export function EnhancedLeaveManager({ userRole, userId }: EnhancedLeaveManagerP
               <Label htmlFor="halfDay" className="text-sm">Half day leave</Label>
             </div>
             
-            <div>
-              <Label htmlFor="reason">Reason</Label>
-              <Textarea
-                id="reason"
-                placeholder="Please provide a reason for your leave request"
-                value={formData.reason}
-                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                rows={3}
-              />
-            </div>
+
             
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>

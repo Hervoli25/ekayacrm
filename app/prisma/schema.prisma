@@ -47,11 +47,19 @@ model User {
   image         String?
   password      String?
   role          Role      @default(EMPLOYEE)
+  departmentId  String?   // Direct department assignment
+  isActive      Boolean   @default(true)
+  lastLogin     DateTime?
+  failedLoginAttempts Int @default(0)
+  lockoutUntil  DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Authentication
   accounts      Account[]
   sessions      Session[]
+  
+  // Basic employee data
   employee      Employee?
   leaveRequests LeaveRequest[]
   
@@ -63,6 +71,74 @@ model User {
   approvedExpenses     Expense[]     @relation("ExpenseApprover")
   createdOrders        SupplyOrder[] @relation("OrderCreator")
   receivedOrders       SupplyOrder[] @relation("OrderReceiver")
+
+  // Department & Hierarchy
+  department           Department?          @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  departmentUser       UserDepartment?      @relation("UserDepartmentUser")
+  departmentAssignments UserDepartment[]    @relation("DepartmentAssigner")
+  managedDepartments   DepartmentManager[]  @relation("DepartmentManagerUser")
+  assignedManagers     DepartmentManager[]  @relation("ManagerAssigner")
+  hierarchyEmployee    EmployeeHierarchy?   @relation("HierarchyEmployee")
+  supervisedEmployees  EmployeeHierarchy[]  @relation("HierarchySupervisor")
+  managedEmployees     EmployeeHierarchy[]  @relation("HierarchyManager")
+
+  // Performance Management
+  employeeReviews      PerformanceReview[]  @relation("EmployeeReviews")
+  reviewerReviews      PerformanceReview[]  @relation("ReviewerReviews")
+  approvedReviews      PerformanceReview[]  @relation("ReviewApprover")
+  goals                Goal[]               @relation("EmployeeGoals")
+  reviewComments       ReviewComment[]      @relation("ReviewComments")
+
+  // Time & Attendance
+  timeEntries          TimeEntry[]          @relation("TimeEntries")
+  approvedTimeEntries  TimeEntry[]          @relation("TimeApprover")
+  schedules            Schedule[]           @relation("Schedules")
+
+  // Payroll
+  payslips             Payslip[]            @relation("EmployeePayslips")
+  approvedPayslips     Payslip[]            @relation("PayslipApprover")
+  processedPayrolls    PayrollPeriod[]      @relation("PayrollProcessor")
+  approvedPayrolls     PayrollPeriod[]      @relation("PayrollApprover")
+
+  // Leave Management
+  enhancedLeaveRequests EnhancedLeaveRequest[] @relation("EnhancedLeaveRequests")
+  leaveApprovals       LeaveApproval[]      @relation("LeaveApprover")
+  leaveDelegations     LeaveApproval[]      @relation("LeaveDelegate")
+
+  // Approvals & Workflows
+  approvalRequests     ApprovalRequest[]    @relation("ApprovalRequester")
+  rejectedApprovals    ApprovalRequest[]    @relation("ApprovalRejector")
+  approvalActions      ApprovalAction[]     @relation("ApprovalActionUser")
+
+  // Disciplinary & Termination
+  disciplinaryActions     DisciplinaryAction[] @relation("DisciplinaryEmployee")
+  initiatedDisciplinary   DisciplinaryAction[] @relation("DisciplinaryInitiator")
+  resolvedDisciplinary    DisciplinaryAction[] @relation("DisciplinaryResolver")
+  termination            Termination?         @relation("TerminatedEmployee")
+  initiatedTerminations  Termination[]        @relation("TerminationInitiator")
+  approvedTerminations   Termination[]        @relation("TerminationApprover")
+
+  // Documents
+  employeeDocuments    Document[]           @relation("EmployeeDocuments")
+  uploadedDocuments    Document[]           @relation("DocumentUploader")
+  documentAccess       DocumentAccess[]     @relation("DocumentUserAccess")
+  grantedDocumentAccess DocumentAccess[]    @relation("DocumentAccessGrantor")
+
+  // Communication & Notifications
+  notifications        Notification[]       @relation("UserNotifications")
+  announcements        Announcement[]       @relation("AnnouncementAuthor")
+
+  // Security & Audit
+  auditLogs            AuditLog[]           @relation("AuditLogs")
+  reportedIncidents    SecurityIncident[]   @relation("IncidentReporter")
+  resolvedIncidents    SecurityIncident[]   @relation("IncidentResolver")
+
+  // Enhanced Profile
+  profile              EmployeeProfile?     @relation("EmployeeProfile")
+
+  // Job Postings & Applications
+  postedJobs           JobPosting[]         @relation("JobPoster")
+  reviewedApplications Application[]        @relation("ApplicationReviewer")
 
   @@map("users")
 }
@@ -125,11 +201,14 @@ model VerificationToken {
 }
 
 enum Role {
-  SUPER_ADMIN      // The 4 directors from PDF - unlimited access
-  ADMIN            // System admins
-  HR_DIRECTOR      // HR Director role  
-  MANAGER          // Managers/Supervisors with limited access
-  EMPLOYEE         // Regular employees
+  SUPER_ADMIN      // System admin - you, with unlimited access
+  DIRECTOR         // Directors you create - full HR powers except system admin  
+  HR_MANAGER       // HR Manager - full HR operations
+  DEPARTMENT_MANAGER // Department managers - manage their department only
+  SUPERVISOR       // Team supervisors - limited management powers
+  SENIOR_EMPLOYEE  // Senior staff - some additional privileges
+  EMPLOYEE         // Regular employees - basic access
+  INTERN           // Interns - restricted access
 }
 
 enum EmployeeStatus {
@@ -352,4 +431,919 @@ enum OrderStatus {
   ORDERED
   DELIVERED
   CANCELLED
+}
+
+// Access Control & Permissions
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "approve_leave", "terminate_employee"
+  category    String   // e.g., "HR", "Finance", "Operations"
+  description String?
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  role         Role
+  permissionId String
+  canCreate    Boolean @default(false)
+  canRead      Boolean @default(true)
+  canUpdate    Boolean @default(false)
+  canDelete    Boolean @default(false)
+  canApprove   Boolean @default(false)
+  constraints  Json?   // Additional constraints like department, salary limits
+
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([role, permissionId])
+  @@map("role_permissions")
+}
+
+model DepartmentManager {
+  id           String   @id @default(cuid())
+  userId       String
+  departmentId String
+  assignedAt   DateTime @default(now())
+  assignedBy   String
+  isActive     Boolean  @default(true)
+
+  manager     User       @relation("DepartmentManagerUser", fields: [userId], references: [id])
+  assigner    User       @relation("ManagerAssigner", fields: [assignedBy], references: [id])
+  department  Department @relation(fields: [departmentId], references: [id])
+
+  @@unique([userId, departmentId])
+  @@map("department_managers")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique // e.g., "HR", "FIN", "IT"
+  description String?
+  budget      Decimal? @db.Decimal(12,2)
+  headCount   Int      @default(0)
+  location    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  managers          DepartmentManager[]
+  employees         User[]              @relation("DepartmentEmployees")
+  approvalWorkflows ApprovalWorkflow[]
+  employeeHierarchy EmployeeHierarchy[]
+  userDepartments   UserDepartment[]    @relation("UserDepartmentDept")
+
+  @@map("departments")
+}
+
+model ApprovalWorkflow {
+  id            String        @id @default(cuid())
+  name          String        // e.g., "Leave Request Approval"
+  type          WorkflowType
+  departmentId  String?       // null = applies to all departments
+  minAmount     Decimal?      @db.Decimal(12,2) // for expense approvals
+  maxAmount     Decimal?      @db.Decimal(12,2)
+  requiresSequentialApproval Boolean @default(false)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+
+  department Department?       @relation(fields: [departmentId], references: [id])
+  steps      ApprovalStep[]
+
+  @@map("approval_workflows")
+}
+
+model ApprovalStep {
+  id         String   @id @default(cuid())
+  workflowId String
+  stepOrder  Int
+  requiredRole Role
+  isOptional Boolean  @default(false)
+  timeoutHours Int?   // Auto-approve after timeout
+  createdAt  DateTime @default(now())
+
+  workflow ApprovalWorkflow @relation(fields: [workflowId], references: [id])
+
+  @@unique([workflowId, stepOrder])
+  @@map("approval_steps")
+}
+
+model ApprovalRequest {
+  id           String          @id @default(cuid())
+  requestType  WorkflowType
+  resourceId   String          // ID of the resource being approved
+  requesterId  String
+  currentStep  Int             @default(1)
+  status       ApprovalStatus  @default(PENDING)
+  submittedAt  DateTime        @default(now())
+  completedAt  DateTime?
+  rejectedAt   DateTime?
+  rejectedBy   String?
+  rejectionReason String?
+  metadata     Json?           // Additional data specific to request type
+
+  requester User              @relation("ApprovalRequester", fields: [requesterId], references: [id])
+  rejector  User?             @relation("ApprovalRejector", fields: [rejectedBy], references: [id])
+  approvals ApprovalAction[]
+
+  @@map("approval_requests")
+}
+
+model ApprovalAction {
+  id        String                @id @default(cuid())
+  requestId String
+  approverId String
+  step      Int
+  action    ApprovalActionType @default(PENDING)
+  comments  String?
+  actionAt  DateTime       @default(now())
+
+  request  ApprovalRequest @relation(fields: [requestId], references: [id])
+  approver User           @relation("ApprovalActionUser", fields: [approverId], references: [id])
+
+  @@unique([requestId, step, approverId])
+  @@map("approval_actions")
+}
+
+// Disciplinary Actions
+model DisciplinaryAction {
+  id           String               @id @default(cuid())
+  employeeId   String
+  initiatedBy  String
+  type         DisciplinaryType
+  severity     DisciplinarySeverity @default(WARNING)
+  reason       String
+  description  String
+  actionTaken  String?
+  followUpDate DateTime?
+  issuedDate   DateTime             @default(now())
+  status       DisciplinaryStatus   @default(ACTIVE)
+  appealDate   DateTime?
+  appealReason String?
+  resolvedDate DateTime?
+  resolvedBy   String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  employee  User  @relation("DisciplinaryEmployee", fields: [employeeId], references: [id])
+  initiator User  @relation("DisciplinaryInitiator", fields: [initiatedBy], references: [id])
+  resolver  User? @relation("DisciplinaryResolver", fields: [resolvedBy], references: [id])
+
+  @@map("disciplinary_actions")
+}
+
+// Termination Management
+model Termination {
+  id              String            @id @default(cuid())
+  employeeId      String            @unique
+  initiatedBy     String
+  reason          TerminationReason
+  type            TerminationType   @default(VOLUNTARY)
+  effectiveDate   DateTime
+  lastWorkingDay  DateTime
+  exitInterview   Boolean           @default(false)
+  exitInterviewDate DateTime?
+  finalPay        Decimal?          @db.Decimal(10,2)
+  benefits        String?
+  returningAssets String?
+  notes           String?
+  status          TerminationStatus @default(INITIATED)
+  approvedBy      String?
+  approvedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  employee  User  @relation("TerminatedEmployee", fields: [employeeId], references: [id])
+  initiator User  @relation("TerminationInitiator", fields: [initiatedBy], references: [id])
+  approver  User? @relation("TerminationApprover", fields: [approvedBy], references: [id])
+
+  @@map("terminations")
+}
+
+// Enhanced Employee model with department and reporting structure
+model EmployeeHierarchy {
+  id           String   @id @default(cuid())
+  employeeId   String   @unique
+  supervisorId String?
+  departmentId String
+  position     String
+  level        Int      @default(1) // 1 = entry level, higher = senior
+  reportsTo    String?  // Direct manager
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee   User       @relation("HierarchyEmployee", fields: [employeeId], references: [id])
+  supervisor User?      @relation("HierarchySupervisor", fields: [supervisorId], references: [id])
+  manager    User?      @relation("HierarchyManager", fields: [reportsTo], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  @@map("employee_hierarchy")
+}
+
+// Performance Management with approval workflows
+model PerformanceReview {
+  id                String           @id @default(cuid())
+  employeeId        String
+  reviewerId        String
+  reviewPeriod      String          // Q1 2024, Annual 2024, etc.
+  status            ReviewStatus    @default(DRAFT)
+  overallRating     Decimal?        @db.Decimal(3,2)
+  strengths         String?
+  areasForImprovement String?
+  goals             Goal[]
+  reviewDate        DateTime?
+  dueDate           DateTime
+  approvedBy        String?
+  approvedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  employee    User @relation("EmployeeReviews", fields: [employeeId], references: [id])
+  reviewer    User @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+  approver    User? @relation("ReviewApprover", fields: [approvedBy], references: [id])
+  ratings     PerformanceRating[]
+  comments    ReviewComment[]
+
+  @@map("performance_reviews")
+}
+
+model PerformanceRating {
+  id        String    @id @default(cuid())
+  reviewId  String
+  category  String    // Communication, Technical Skills, etc.
+  rating    Int       // 1-5 scale
+  comments  String?
+  createdAt DateTime  @default(now())
+
+  review PerformanceReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("performance_ratings")
+}
+
+model Goal {
+  id          String     @id @default(cuid())
+  employeeId  String
+  reviewId    String?
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      GoalStatus @default(IN_PROGRESS)
+  progress    Int        @default(0) // 0-100%
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  employee User                 @relation("EmployeeGoals", fields: [employeeId], references: [id])
+  review   PerformanceReview?   @relation(fields: [reviewId], references: [id])
+  updates  GoalUpdate[]
+
+  @@map("goals")
+}
+
+model GoalUpdate {
+  id        String   @id @default(cuid())
+  goalId    String
+  progress  Int      // 0-100%
+  notes     String?
+  createdAt DateTime @default(now())
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("goal_updates")
+}
+
+model ReviewComment {
+  id        String   @id @default(cuid())
+  reviewId  String
+  authorId  String
+  comment   String
+  isPrivate Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  review PerformanceReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  author User             @relation("ReviewComments", fields: [authorId], references: [id])
+
+  @@map("review_comments")
+}
+
+// Time Tracking & Attendance
+model TimeEntry {
+  id          String     @id @default(cuid())
+  employeeId  String
+  clockIn     DateTime
+  clockOut    DateTime?
+  breakStart  DateTime?
+  breakEnd    DateTime?
+  totalHours  Decimal?   @db.Decimal(4,2)
+  location    String?    // GPS coordinates or office location
+  notes       String?
+  status      TimeStatus @default(ACTIVE)
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  employee User  @relation("TimeEntries", fields: [employeeId], references: [id])
+  approver User? @relation("TimeApprover", fields: [approvedBy], references: [id])
+
+  @@map("time_entries")
+}
+
+model Schedule {
+  id         String      @id @default(cuid())
+  employeeId String
+  dayOfWeek  Int         // 0 = Sunday, 1 = Monday, etc.
+  startTime  String      // "09:00"
+  endTime    String      // "17:00"
+  isActive   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+
+  employee User @relation("Schedules", fields: [employeeId], references: [id])
+
+  @@unique([employeeId, dayOfWeek])
+  @@map("schedules")
+}
+
+// Payroll Management
+model PayrollPeriod {
+  id        String   @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime
+  status    PayrollStatus @default(DRAFT)
+  processedBy String?
+  approvedBy  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payslips  Payslip[]
+  processor User?     @relation("PayrollProcessor", fields: [processedBy], references: [id])
+  approver  User?     @relation("PayrollApprover", fields: [approvedBy], references: [id])
+
+  @@map("payroll_periods")
+}
+
+model Payslip {
+  id               String   @id @default(cuid())
+  employeeId       String
+  payrollPeriodId  String
+  baseSalary       Decimal  @db.Decimal(10,2)
+  overtime         Decimal  @default(0) @db.Decimal(10,2)
+  bonuses          Decimal  @default(0) @db.Decimal(10,2)
+  commission       Decimal  @default(0) @db.Decimal(10,2)
+  allowances       Decimal  @default(0) @db.Decimal(10,2)
+  grossPay         Decimal  @db.Decimal(10,2)
+  taxDeductions    Decimal  @db.Decimal(10,2)
+  otherDeductions  Decimal  @default(0) @db.Decimal(10,2)
+  netPay           Decimal  @db.Decimal(10,2)
+  payDate          DateTime?
+  status           PayslipStatus @default(GENERATED)
+  approvedBy       String?
+  createdAt        DateTime @default(now())
+
+  employee      User          @relation("EmployeePayslips", fields: [employeeId], references: [id])
+  payrollPeriod PayrollPeriod @relation(fields: [payrollPeriodId], references: [id])
+  approver      User?         @relation("PayslipApprover", fields: [approvedBy], references: [id])
+
+  @@unique([employeeId, payrollPeriodId])
+  @@map("payslips")
+}
+
+// Enhanced Leave Request with approval workflow
+model EnhancedLeaveRequest {
+  id          String      @id @default(cuid())
+  userId      String
+  employeeId  String?     // For admin-created requests
+  startDate   DateTime
+  endDate     DateTime
+  leaveType   LeaveType
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  adminNotes  String?
+  currentApprovalStep Int @default(1)
+  approvalWorkflowId String?
+  totalDays   Int?        // Calculated field
+  attachmentUrl String?   // For medical certificates, etc.
+  isHalfDay   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user User @relation("EnhancedLeaveRequests", fields: [userId], references: [id])
+  approvals LeaveApproval[]
+
+  @@map("enhanced_leave_requests")
+}
+
+model LeaveApproval {
+  id              String                @id @default(cuid())
+  leaveRequestId  String
+  approverId      String
+  step            Int
+  action          ApprovalActionType @default(PENDING)
+  comments        String?
+  actionAt        DateTime         @default(now())
+  delegatedTo     String?          // If approval is delegated
+
+  leaveRequest EnhancedLeaveRequest @relation(fields: [leaveRequestId], references: [id])
+  approver     User                 @relation("LeaveApprover", fields: [approverId], references: [id])
+  delegate     User?                @relation("LeaveDelegate", fields: [delegatedTo], references: [id])
+
+  @@unique([leaveRequestId, step, approverId])
+  @@map("leave_approvals")
+}
+
+// Recruitment & Onboarding
+model JobPosting {
+  id             String       @id @default(cuid())
+  title          String
+  department     String
+  description    String
+  requirements   String
+  salaryRange    String?
+  location       String
+  employmentType EmploymentType @default(FULL_TIME)
+  status         JobStatus    @default(ACTIVE)
+  postedBy       String
+  postedAt       DateTime     @default(now())
+  closingDate    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  poster       User          @relation("JobPoster", fields: [postedBy], references: [id])
+  applications Application[]
+
+  @@map("job_postings")
+}
+
+model Application {
+  id           String           @id @default(cuid())
+  jobId        String
+  candidateName String
+  email        String
+  phone        String?
+  resumeUrl    String?
+  coverLetter  String?
+  status       ApplicationStatus @default(RECEIVED)
+  appliedAt    DateTime         @default(now())
+  reviewedAt   DateTime?
+  reviewedBy   String?
+  notes        String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  job      JobPosting  @relation(fields: [jobId], references: [id])
+  reviewer User?       @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+  interviews Interview[]
+
+  @@map("applications")
+}
+
+model Interview {
+  id            String         @id @default(cuid())
+  applicationId String
+  interviewerIds String[]      // Array of interviewer user IDs
+  scheduledAt   DateTime
+  duration      Int            // in minutes
+  location      String?
+  type          InterviewType  @default(IN_PERSON)
+  status        InterviewStatus @default(SCHEDULED)
+  feedback      String?
+  rating        Int?           // 1-5 scale
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id])
+
+  @@map("interviews")
+}
+
+// Document Management
+model Document {
+  id           String       @id @default(cuid())
+  name         String
+  type         DocumentType
+  category     String?
+  employeeId   String?
+  uploadedBy   String
+  fileUrl      String
+  fileSize     Int?         // in bytes
+  mimeType     String
+  isConfidential Boolean    @default(false)
+  expiryDate   DateTime?
+  version      Int          @default(1)
+  parentId     String?      // For document versions
+  tags         String[]     @default([])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  employee User? @relation("EmployeeDocuments", fields: [employeeId], references: [id])
+  uploader User  @relation("DocumentUploader", fields: [uploadedBy], references: [id])
+  parent   Document? @relation("DocumentVersions", fields: [parentId], references: [id])
+  versions Document[] @relation("DocumentVersions")
+  accesses DocumentAccess[]
+
+  @@map("documents")
+}
+
+model DocumentAccess {
+  id         String   @id @default(cuid())
+  documentId String
+  userId     String
+  accessType AccessType @default(VIEW)
+  grantedBy  String
+  grantedAt  DateTime @default(now())
+  expiresAt  DateTime?
+
+  document  Document @relation(fields: [documentId], references: [id])
+  user      User     @relation("DocumentUserAccess", fields: [userId], references: [id])
+  grantor   User     @relation("DocumentAccessGrantor", fields: [grantedBy], references: [id])
+
+  @@unique([documentId, userId])
+  @@map("document_access")
+}
+
+// Notifications & Communication
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  title      String
+  message    String
+  type       NotificationType @default(INFO)
+  isRead     Boolean          @default(false)
+  actionUrl  String?
+  createdAt  DateTime         @default(now())
+  readAt     DateTime?
+
+  user User @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  isUrgent    Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  expiresAt   DateTime?
+  targetRoles Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation("AnnouncementAuthor", fields: [authorId], references: [id])
+
+  @@map("announcements")
+}
+
+// Add department relation to User model updates needed
+model UserDepartment {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  departmentId String
+  assignedAt   DateTime @default(now())
+  assignedBy   String
+
+  user       User       @relation("UserDepartmentUser", fields: [userId], references: [id])
+  department Department @relation("UserDepartmentDept", fields: [departmentId], references: [id])
+  assigner   User       @relation("DepartmentAssigner", fields: [assignedBy], references: [id])
+
+  @@map("user_departments")
+}
+
+// Enhanced Employee Profile
+model EmployeeProfile {
+  id                String    @id @default(cuid())
+  employeeId        String    @unique
+  dateOfBirth       DateTime?
+  gender            Gender?
+  maritalStatus     MaritalStatus?
+  nationality       String?
+  taxNumber         String?
+  socialSecurityNo  String?
+  bankAccount       String?
+  bankName          String?
+  nextOfKin         String?
+  nextOfKinPhone    String?
+  nextOfKinRelation String?
+  medicalAid        String?
+  medicalAidNo      String?
+  allergies         String?
+  bloodType         String?
+  salaryGrade       String?
+  clearanceLevel    SecurityClearance @default(NONE)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  employee User @relation("EmployeeProfile", fields: [employeeId], references: [id])
+  skills   EmployeeSkill[]
+  certifications Certification[]
+
+  @@map("employee_profiles")
+}
+
+model EmployeeSkill {
+  id          String      @id @default(cuid())
+  profileId   String
+  skillName   String
+  level       SkillLevel
+  yearsExp    Int?
+  certified   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  profile EmployeeProfile @relation(fields: [profileId], references: [id])
+
+  @@map("employee_skills")
+}
+
+model Certification {
+  id           String    @id @default(cuid())
+  profileId    String
+  name         String
+  issuer       String
+  issueDate    DateTime
+  expiryDate   DateTime?
+  credentialId String?
+  verifyUrl    String?
+  createdAt    DateTime  @default(now())
+
+  profile EmployeeProfile @relation(fields: [profileId], references: [id])
+
+  @@map("certifications")
+}
+
+// Audit & Compliance
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  resource    String
+  resourceId  String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  riskLevel   RiskLevel @default(LOW)
+  timestamp   DateTime @default(now())
+
+  user User? @relation("AuditLogs", fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Security & Compliance
+model SecurityIncident {
+  id           String         @id @default(cuid())
+  reportedBy   String
+  incidentType IncidentType
+  severity     IncidentSeverity @default(LOW)
+  description  String
+  affectedUsers String[]       @default([])
+  resolution   String?
+  status       IncidentStatus @default(OPEN)
+  reportedAt   DateTime       @default(now())
+  resolvedAt   DateTime?
+  resolvedBy   String?
+
+  reporter User  @relation("IncidentReporter", fields: [reportedBy], references: [id])
+  resolver User? @relation("IncidentResolver", fields: [resolvedBy], references: [id])
+
+  @@map("security_incidents")
+}
+
+// New Enums
+enum WorkflowType {
+  LEAVE_REQUEST
+  EXPENSE_APPROVAL
+  PERFORMANCE_REVIEW
+  DISCIPLINARY_ACTION
+  TERMINATION
+  SALARY_CHANGE
+  PROMOTION
+  TRANSFER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  ESCALATED
+}
+
+enum ApprovalActionType {
+  PENDING
+  APPROVED
+  REJECTED
+  DELEGATED
+  ESCALATED
+}
+
+enum DisciplinaryType {
+  VERBAL_WARNING
+  WRITTEN_WARNING
+  SUSPENSION
+  DEMOTION
+  TERMINATION
+  PERFORMANCE_IMPROVEMENT
+}
+
+enum DisciplinarySeverity {
+  MINOR
+  WARNING
+  MAJOR
+  SEVERE
+  CRITICAL
+}
+
+enum DisciplinaryStatus {
+  ACTIVE
+  RESOLVED
+  APPEALED
+  OVERTURNED
+}
+
+enum TerminationReason {
+  RESIGNATION
+  RETIREMENT
+  DISMISSAL
+  REDUNDANCY
+  END_OF_CONTRACT
+  DEATH
+  OTHER
+}
+
+enum TerminationType {
+  VOLUNTARY
+  INVOLUNTARY
+  MUTUAL_AGREEMENT
+}
+
+enum TerminationStatus {
+  INITIATED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReviewStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  APPROVED
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  OVERDUE
+}
+
+enum TimeStatus {
+  ACTIVE
+  COMPLETED
+  OVERTIME
+  ABSENT
+}
+
+enum PayrollStatus {
+  DRAFT
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PayslipStatus {
+  GENERATED
+  REVIEWED
+  APPROVED
+  PAID
+}
+
+enum SecurityClearance {
+  NONE
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentType {
+  DATA_BREACH
+  UNAUTHORIZED_ACCESS
+  POLICY_VIOLATION
+  SYSTEM_COMPROMISE
+  PHYSICAL_SECURITY
+  OTHER
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+  INTERN
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  RECEIVED
+  REVIEWING
+  SHORTLISTED
+  INTERVIEWING
+  OFFERED
+  HIRED
+  REJECTED
+}
+
+enum InterviewType {
+  IN_PERSON
+  VIDEO_CALL
+  PHONE
+  PANEL
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum DocumentType {
+  CONTRACT
+  ID_DOCUMENT
+  QUALIFICATION
+  MEDICAL
+  POLICY
+  FORM
+  REPORT
+  OTHER
+}
+
+enum AccessType {
+  VIEW
+  EDIT
+  DOWNLOAD
+  DELETE
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  REMINDER
 }

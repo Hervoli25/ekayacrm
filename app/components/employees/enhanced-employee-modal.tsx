@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -182,6 +183,11 @@ export function EnhancedEmployeeModal({ employee, isOpen, onClose }: EnhancedEmp
             <User className="mr-2 h-5 w-5" />
             {employee ? 'Edit Employee' : 'Add New Employee'}
           </DialogTitle>
+          <DialogDescription>
+            {employee
+              ? 'Update employee information across all tabs. All fields marked with * are required.'
+              : 'Create a comprehensive employee profile. Fill in all required fields marked with *.'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>

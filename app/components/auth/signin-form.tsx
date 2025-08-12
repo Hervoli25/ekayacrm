@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, User, Lock, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import toast from 'react-hot-toast';
+import { User, Lock } from 'lucide-react';
+import { AnimatedBrand } from '@/components/ui/animated-brand';
+import { showSuccess, showError, showLoading } from '@/lib/sweetalert';
+import Swal from 'sweetalert2';
 
 export function SignInForm() {
   const [username, setUsername] = useState('');
@@ -24,6 +25,9 @@ export function SignInForm() {
     setIsLoading(true);
     setError('');
 
+    // Show loading alert
+    showLoading('Signing you in...', 'Please wait while we verify your credentials');
+
     try {
       const result = await signIn('credentials', {
         email: username,
@@ -31,49 +35,48 @@ export function SignInForm() {
         redirect: false,
       });
 
+      // Close loading alert
+      Swal.close();
+
       if (result?.error) {
         setError('Invalid username or password');
+        await showError(
+          'Authentication Failed',
+          'Invalid username or password. Please check your credentials and try again.'
+        );
       } else {
-        toast.success('Signed in successfully!');
-        
+        await showSuccess(
+          'Welcome Back!',
+          'You have been signed in successfully.'
+        );
+
         // Get updated session to check user role
         const session = await getSession();
         router.push('/dashboard');
         router.refresh();
       }
     } catch (error) {
+      // Close loading alert
+      Swal.close();
       setError('An error occurred. Please try again.');
+      await showError(
+        'Connection Error',
+        'Unable to connect to the server. Please check your internet connection and try again.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md shadow-lg">
-      <CardHeader className="space-y-1 pb-4">
-        <div className="flex items-center justify-center mb-4">
-          <div className="bg-blue-600 p-3 rounded-lg">
-            <Building2 className="h-8 w-8 text-white" />
-          </div>
-        </div>
-        <CardTitle className="text-2xl text-center font-semibold text-gray-900">
-          Ekhaya Intel Trading
-        </CardTitle>
-        <CardDescription className="text-center text-gray-600">
-          HR & Finance Management System
-        </CardDescription>
+    <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+      <CardHeader className="space-y-6 pb-6">
+        <AnimatedBrand size="md" showIcon={true} />
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
+        <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username" className="text-gray-700 font-medium">Username</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -83,14 +86,14 @@ export function SignInForm() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="pl-10"
+                className="pl-10 h-12 border-gray-300 focus:border-red-500 focus:ring-red-500 rounded-lg stable-input"
                 disabled={isLoading}
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -100,28 +103,36 @@ export function SignInForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="pl-10"
+                className="pl-10 h-12 border-gray-300 focus:border-red-500 focus:ring-red-500 rounded-lg stable-input"
                 disabled={isLoading}
+                showPasswordToggle={true}
               />
             </div>
           </div>
-          
-          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-700">
-              <strong>Admin Access:</strong> Use your company credentials to sign in.
+
+          <div className="bg-gradient-to-r from-red-50 to-blue-50 p-4 rounded-xl border border-red-200/50">
+            <p className="text-sm text-gray-700">
+              <strong className="text-red-600">Admin Access:</strong> Use your company credentials to sign in.
               <br />
-              <strong>New Users:</strong> Contact your administrator or register a new account.
+              <strong className="text-blue-600">New Users:</strong> Contact your administrator or register a new account.
             </p>
           </div>
         </CardContent>
-        
-        <CardFooter>
-          <Button 
-            type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700"
+
+        <CardFooter className="pt-6">
+          <Button
+            type="submit"
+            className="w-full h-12 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              'Sign In'
+            )}
           </Button>
         </CardFooter>
       </form>

@@ -74,7 +74,7 @@ export default function EmployeePerformance() {
       const response = await fetch('/api/employees');
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
-      setEmployees(data);
+      setEmployees(data.employees || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
@@ -83,7 +83,7 @@ export default function EmployeePerformance() {
   const fetchPerformances = async () => {
     try {
       const params = new URLSearchParams({
-        ...(selectedEmployee && session?.user?.role === 'ADMIN' ? { employeeId: selectedEmployee } : {}),
+        ...(selectedEmployee && ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') ? { employeeId: selectedEmployee } : {}),
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
       });
@@ -137,7 +137,7 @@ export default function EmployeePerformance() {
   }));
 
   // Employee comparison data (for admins)
-  const employeeComparison = session?.user?.role === 'ADMIN' ? 
+  const employeeComparison = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') ?
     employees.map(emp => {
       const empPerformances = performances.filter(p => p.employee.email === emp.email);
       const revenue = empPerformances.reduce((sum, p) => sum + Number(p.revenue), 0);
@@ -171,7 +171,7 @@ export default function EmployeePerformance() {
       <Card>
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-3">
-            {session?.user?.role === 'ADMIN' && (
+            {['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') && (
               <div className="space-y-2">
                 <Label>Employee</Label>
                 <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
@@ -317,7 +317,7 @@ export default function EmployeePerformance() {
       </div>
 
       {/* Employee Comparison (Admin only) */}
-      {session?.user?.role === 'ADMIN' && employeeComparison.length > 0 && (
+      {['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role || '') && employeeComparison.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Employee Comparison</CardTitle>

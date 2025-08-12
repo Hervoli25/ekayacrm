@@ -18,6 +18,7 @@ import { LeaveRequestModal } from './leave-request-modal';
 import { LeaveApprovalModal } from './leave-approval-modal';
 import { LeaveRequest } from '@/lib/types';
 import toast from 'react-hot-toast';
+import { showDeleteConfirmation } from '@/lib/sweetalert';
 
 interface LeaveRequestManagerProps {
   userRole: Role;
@@ -68,7 +69,8 @@ export function LeaveRequestManager({ userRole, userId }: LeaveRequestManagerPro
   };
 
   const handleDeleteRequest = async (requestId: string) => {
-    if (!confirm('Are you sure you want to delete this leave request?')) {
+    const result = await showDeleteConfirmation('this leave request');
+    if (!result.isConfirmed) {
       return;
     }
 

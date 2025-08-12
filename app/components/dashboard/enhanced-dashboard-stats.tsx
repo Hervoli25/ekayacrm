@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { QuickEmployeeAdd } from './quick-employee-add';
 import {
   Select,
   SelectContent,
@@ -146,73 +147,73 @@ export function EnhancedDashboardStats({ userRole, userId }: EnhancedDashboardSt
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalEmployees}</p>
-                <div className="flex items-center mt-1">
+                <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent">{stats.totalEmployees}</p>
+                <div className="flex items-center mt-2">
                   <UserCheck className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">{stats.activeEmployees} active</span>
+                  <span className="text-sm text-green-600 font-medium">{stats.activeEmployees} active</span>
                 </div>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="bg-gradient-to-br from-red-500 to-blue-500 p-3 rounded-xl shadow-lg">
+                <Users className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">New Hires</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.newHiresThisMonth}</p>
-                <div className="flex items-center mt-1">
+                <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{stats.newHiresThisMonth}</p>
+                <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">This month</span>
+                  <span className="text-sm text-green-600 font-medium">This month</span>
                 </div>
               </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <UserPlus className="h-6 w-6 text-green-600" />
+              <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-xl shadow-lg">
+                <UserPlus className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Leaves</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingLeaveRequests}</p>
-                <div className="flex items-center mt-1">
+                <p className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">{stats.pendingLeaveRequests}</p>
+                <div className="flex items-center mt-2">
                   <Clock className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="text-sm text-yellow-600">Awaiting approval</span>
+                  <span className="text-sm text-yellow-600 font-medium">Awaiting approval</span>
                 </div>
               </div>
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <CalendarDays className="h-6 w-6 text-yellow-600" />
+              <div className="bg-gradient-to-br from-yellow-500 to-orange-500 p-3 rounded-xl shadow-lg">
+                <CalendarDays className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">On Leave Today</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.approvedLeavesToday}</p>
-                <div className="flex items-center mt-1">
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">{stats.approvedLeavesToday}</p>
+                <div className="flex items-center mt-2">
                   <CheckCircle2 className="h-4 w-4 text-blue-500 mr-1" />
-                  <span className="text-sm text-blue-600">Approved leaves</span>
+                  <span className="text-sm text-blue-600 font-medium">Approved leaves</span>
                 </div>
               </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <Calendar className="h-6 w-6 text-purple-600" />
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-500 p-3 rounded-xl shadow-lg">
+                <Calendar className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
             </div>
           </CardContent>
@@ -223,27 +224,29 @@ export function EnhancedDashboardStats({ userRole, userId }: EnhancedDashboardSt
         <>
           {/* Department & Status Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-blue-50 rounded-t-lg">
+                <CardTitle className="flex items-center text-gray-800">
+                  <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg mr-3">
+                    <Building className="h-5 w-5 text-white" />
+                  </div>
                   Employees by Department
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   {stats.employeesByDepartment.map((dept, index) => (
-                    <div key={dept.department} className="flex items-center justify-between">
+                    <div key={dept.department} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 hover:from-red-50 hover:to-blue-50 transition-all duration-300">
                       <div className="flex items-center space-x-3">
-                        <Badge className={getDepartmentColor(index)} variant="secondary">
+                        <Badge className={`${getDepartmentColor(index)} font-medium`} variant="secondary">
                           {dept.department}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">{dept.count}</span>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-bold text-gray-800">{dept.count}</span>
+                        <div className="w-20 bg-gray-200 rounded-full h-3">
+                          <div
+                            className="bg-gradient-to-r from-red-500 to-blue-500 h-3 rounded-full transition-all duration-500"
                             style={{ width: `${(dept.count / stats.totalEmployees) * 100}%` }}
                           ></div>
                         </div>
@@ -254,39 +257,41 @@ export function EnhancedDashboardStats({ userRole, userId }: EnhancedDashboardSt
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-blue-50 rounded-t-lg">
+                <CardTitle className="flex items-center text-gray-800">
+                  <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg mr-3">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
                   Employee Status Overview
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   {stats.employeesByStatus.map((status) => (
-                    <div key={status.status} className="flex items-center justify-between">
+                    <div key={status.status} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 hover:from-red-50 hover:to-blue-50 transition-all duration-300">
                       <div className="flex items-center space-x-3">
-                        <Badge 
-                          className={
+                        <Badge
+                          className={`font-medium ${
                             status.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
                             status.status === 'TERMINATED' ? 'bg-red-100 text-red-800' :
                             status.status === 'ON_LEAVE' ? 'bg-blue-100 text-blue-800' :
                             'bg-yellow-100 text-yellow-800'
-                          } 
+                          }`}
                           variant="secondary"
                         >
                           {status.status.replace('_', ' ')}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">{status.count}</span>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              status.status === 'ACTIVE' ? 'bg-green-600' :
-                              status.status === 'TERMINATED' ? 'bg-red-600' :
-                              status.status === 'ON_LEAVE' ? 'bg-blue-600' :
-                              'bg-yellow-600'
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-bold text-gray-800">{status.count}</span>
+                        <div className="w-20 bg-gray-200 rounded-full h-3">
+                          <div
+                            className={`h-3 rounded-full transition-all duration-500 ${
+                              status.status === 'ACTIVE' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                              status.status === 'TERMINATED' ? 'bg-gradient-to-r from-red-500 to-rose-500' :
+                              status.status === 'ON_LEAVE' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                              'bg-gradient-to-r from-yellow-500 to-orange-500'
                             }`}
                             style={{ width: `${(status.count / stats.totalEmployees) * 100}%` }}
                           ></div>
@@ -301,71 +306,75 @@ export function EnhancedDashboardStats({ userRole, userId }: EnhancedDashboardSt
 
           {/* Leave Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <PieChart className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-blue-50 rounded-t-lg">
+                <CardTitle className="flex items-center text-gray-800">
+                  <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg mr-3">
+                    <PieChart className="h-5 w-5 text-white" />
+                  </div>
                   Leave Requests by Type
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   {stats.leaveRequestsByType.map((leave, index) => (
-                    <div key={leave.type} className="flex items-center justify-between">
+                    <div key={leave.type} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 hover:from-red-50 hover:to-blue-50 transition-all duration-300">
                       <div className="flex items-center space-x-3">
-                        <Badge 
-                          className={
+                        <Badge
+                          className={`font-medium ${
                             leave.type === 'VACATION' ? 'bg-purple-100 text-purple-800' :
                             leave.type === 'SICK_LEAVE' ? 'bg-red-100 text-red-800' :
                             leave.type === 'PERSONAL' ? 'bg-blue-100 text-blue-800' :
                             leave.type === 'EMERGENCY' ? 'bg-orange-100 text-orange-800' :
                             'bg-gray-100 text-gray-800'
-                          } 
+                          }`}
                           variant="secondary"
                         >
                           {leave.type.replace('_', ' ')}
                         </Badge>
                       </div>
-                      <span className="text-sm font-medium">{leave.count}</span>
+                      <span className="text-sm font-bold text-gray-800">{leave.count}</span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-blue-50 rounded-t-lg">
+                <CardTitle className="flex items-center text-gray-800">
+                  <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg mr-3">
+                    <BarChart3 className="h-5 w-5 text-white" />
+                  </div>
                   Recent HR Activity
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {stats.recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
-                      <div className={`p-2 rounded-full ${
-                        activity.type === 'new_employee' ? 'bg-green-100' :
-                        activity.type === 'leave_request' ? 'bg-blue-100' :
-                        activity.type === 'leave_approved' ? 'bg-green-100' :
-                        activity.type === 'leave_rejected' ? 'bg-red-100' :
-                        'bg-gray-100'
+                    <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-red-50 hover:to-blue-50 rounded-lg transition-all duration-300">
+                      <div className={`p-2 rounded-full shadow-sm ${
+                        activity.type === 'new_employee' ? 'bg-gradient-to-r from-green-100 to-emerald-100' :
+                        activity.type === 'leave_request' ? 'bg-gradient-to-r from-blue-100 to-indigo-100' :
+                        activity.type === 'leave_approved' ? 'bg-gradient-to-r from-green-100 to-emerald-100' :
+                        activity.type === 'leave_rejected' ? 'bg-gradient-to-r from-red-100 to-rose-100' :
+                        'bg-gradient-to-r from-gray-100 to-slate-100'
                       }`}>
                         {activity.type === 'new_employee' && <UserPlus className="h-4 w-4 text-green-600" />}
                         {activity.type === 'leave_request' && <CalendarDays className="h-4 w-4 text-blue-600" />}
                         {activity.type === 'leave_approved' && <CheckCircle2 className="h-4 w-4 text-green-600" />}
                         {activity.type === 'leave_rejected' && <XCircle className="h-4 w-4 text-red-600" />}
-                        {!['new_employee', 'leave_request', 'leave_approved', 'leave_rejected'].includes(activity.type) && 
+                        {!['new_employee', 'leave_request', 'leave_approved', 'leave_rejected'].includes(activity.type) &&
                           <Activity className="h-4 w-4 text-gray-600" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 truncate">{activity.description}</p>
-                        <p className="text-xs text-gray-500">{format(new Date(activity.date), 'MMM dd, HH:mm')}</p>
+                        <p className="text-sm text-gray-900 truncate font-medium">{activity.description}</p>
+                        <p className="text-xs text-gray-500 font-medium">{format(new Date(activity.date), 'MMM dd, HH:mm')}</p>
                       </div>
                     </div>
                   ))}
                   {stats.recentActivity.length === 0 && (
-                    <p className="text-gray-500 text-sm text-center py-4">No recent activity</p>
+                    <p className="text-gray-500 text-sm text-center py-8 font-medium">No recent activity</p>
                   )}
                 </div>
               </CardContent>
@@ -375,41 +384,96 @@ export function EnhancedDashboardStats({ userRole, userId }: EnhancedDashboardSt
       )}
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-red-50 to-blue-50 rounded-t-lg">
+          <CardTitle className="flex items-center text-gray-800">
+            <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg mr-3">
+              <Activity className="h-5 w-5 text-white" />
+            </div>
+            Quick Actions
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-24 flex flex-col space-y-2" asChild>
+            <Button
+              variant="outline"
+              className="h-28 flex flex-col space-y-3 border-2 border-gray-200 hover:border-red-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+              asChild
+            >
               <a href="/leave-requests">
-                <CalendarDays className="h-6 w-6" />
-                <span className="text-sm">View Leaves</span>
+                <div className="bg-gradient-to-r from-red-500 to-blue-500 p-2 rounded-lg">
+                  <CalendarDays className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">View Leaves</span>
               </a>
             </Button>
             {isManager && (
               <>
-                <Button variant="outline" className="h-24 flex flex-col space-y-2" asChild>
+                <Button
+                  variant="outline"
+                  className="h-28 flex flex-col space-y-3 border-2 border-gray-200 hover:border-green-300 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                  asChild
+                >
                   <a href="/employees">
-                    <Users className="h-6 w-6" />
-                    <span className="text-sm">Manage Employees</span>
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-lg">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Manage Employees</span>
                   </a>
                 </Button>
-                <Button variant="outline" className="h-24 flex flex-col space-y-2" asChild>
+                <Button
+                  variant="outline"
+                  className="h-28 flex flex-col space-y-3 border-2 border-gray-200 hover:border-purple-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                  asChild
+                >
                   <a href="/finance">
-                    <BarChart3 className="h-6 w-6" />
-                    <span className="text-sm">Finance Reports</span>
+                    <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-2 rounded-lg">
+                      <BarChart3 className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Finance Reports</span>
                   </a>
                 </Button>
-                <Button variant="outline" className="h-24 flex flex-col space-y-2" asChild>
+                <Button
+                  variant="outline"
+                  className="h-28 flex flex-col space-y-3 border-2 border-gray-200 hover:border-yellow-300 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                  asChild
+                >
                   <a href="/auth/register">
-                    <UserPlus className="h-6 w-6" />
-                    <span className="text-sm">Add User</span>
+                    <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 rounded-lg">
+                      <UserPlus className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Add User</span>
                   </a>
                 </Button>
               </>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Employee Add - Only for authorized roles */}
+      {['DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER', 'SUPER_ADMIN'].includes(userRole) && (
+        <QuickEmployeeAdd userRole={userRole} />
+      )}
+
+      {/* Test Card for Form Stability */}
+      <Card className="hover:shadow-lg transition-shadow duration-300">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-lg">
+            <CheckCircle2 className="mr-2 h-5 w-5 text-green-600" />
+            Form Test
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600 text-sm mb-4">
+            Test the stable form system - no jumping or shaking while typing.
+          </p>
+          <Button
+            onClick={() => window.location.href = '/employees'}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            Test Employee Form
+          </Button>
         </CardContent>
       </Card>
     </div>

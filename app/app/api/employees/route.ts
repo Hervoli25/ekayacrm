@@ -39,13 +39,38 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
+            id: true,
             role: true,
+            lastLogin: true,
           },
         },
       },
     });
 
-    return NextResponse.json(employees);
+    // Transform data to include additional fields expected by frontend
+    const transformedEmployees = employees.map(emp => ({
+      id: emp.id,
+      employeeId: emp.employeeId,
+      name: emp.name,
+      email: emp.email,
+      title: emp.title,
+      department: emp.department,
+      role: emp.user?.role || 'EMPLOYEE',
+      status: emp.status,
+      salary: emp.salary ? Number(emp.salary) : undefined,
+      hireDate: emp.hireDate.toISOString(),
+      phone: emp.phone,
+      lastLogin: emp.user?.lastLogin?.toISOString(),
+      performanceScore: Math.random() * 2 + 3.0, // Mock data for now
+      pendingLeave: Math.floor(Math.random() * 3),
+      clearanceLevel: 'NONE', // Would be fetched from EmployeeProfile in real implementation
+      reportsTo: null // Would be fetched from EmployeeHierarchy in real implementation
+    }));
+
+    return NextResponse.json({ 
+      employees: transformedEmployees,
+      total: transformedEmployees.length 
+    });
   } catch (error) {
     console.error('Get employees error:', error);
     return NextResponse.json(

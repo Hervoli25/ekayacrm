@@ -147,3 +147,18 @@ export const canAccessFeature = (userRole: UserRole, feature: string): boolean =
       return false;
   }
 };
+
+// Helper function to check if user is SUPER_ADMIN (master key)
+export const isSuperAdmin = (userRole: UserRole): boolean => {
+  return userRole === 'SUPER_ADMIN';
+};
+
+// Helper function to check if user has admin-level access (SUPER_ADMIN or ADMIN)
+export const hasAdminAccess = (userRole: UserRole): boolean => {
+  return ['SUPER_ADMIN', 'ADMIN'].includes(userRole);
+};
+
+// Helper function to check if user can manage employees
+export const canManageEmployees = (userRole: UserRole): boolean => {
+  return ['SUPER_ADMIN', 'ADMIN', 'HR_DIRECTOR', 'DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER'].includes(userRole);
+};

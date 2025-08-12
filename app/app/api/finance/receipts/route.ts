@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
             lte: new Date(endDate),
           },
         } : {}),
-        ...(employeeId && session.user.role === 'ADMIN' ? {
+        ...(employeeId && ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role) ? {
           employeeId,
         } : session.user.role === 'EMPLOYEE' ? {
           employeeId: session.user.id,

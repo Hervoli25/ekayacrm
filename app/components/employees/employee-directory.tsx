@@ -15,9 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Users } from 'lucide-react';
 import { Role } from '@prisma/client';
 import { EmployeeTable } from './employee-table';
-import { EnhancedEmployeeModal } from './enhanced-employee-modal';
+import { StableEmployeeForm } from './stable-employee-form';
+import { EmployeeFormDebug } from './employee-form-debug';
 import { Employee } from '@/lib/types';
 import toast from 'react-hot-toast';
+import { showDeleteConfirmation } from '@/lib/sweetalert';
 
 interface EmployeeDirectoryProps {
   userRole: Role;
@@ -44,7 +46,7 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
       const data = await response.json();
       
       if (response.ok) {
-        setEmployees(data || []);
+        setEmployees(data.employees || []);
       } else {
         toast.error('Failed to fetch employees');
       }
@@ -71,7 +73,8 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
   };
 
   const handleDeleteEmployee = async (employeeId: string) => {
-    if (!confirm('Are you sure you want to delete this employee?')) {
+    const result = await showDeleteConfirmation('this employee');
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -111,7 +114,7 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
           </p>
         </div>
         
-        {['SUPER_ADMIN', 'ADMIN', 'HR_DIRECTOR'].includes(userRole) && (
+        {['DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER', 'SUPER_ADMIN'].includes(userRole) && (
           <Button onClick={handleAddEmployee} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="mr-2 h-4 w-4" />
             Add Employee
@@ -169,10 +172,11 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
       />
 
       {isModalOpen && (
-        <EnhancedEmployeeModal
+        <StableEmployeeForm
           employee={editingEmployee}
           isOpen={isModalOpen}
           onClose={handleModalClose}
+          onSuccess={fetchEmployees}
         />
       )}
     </div>

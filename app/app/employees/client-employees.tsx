@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Navbar } from '@/components/layout/navbar';
-import { EmployeeDirectory } from '@/components/employees/employee-directory';
+import { AdvancedEmployeeManagement } from '@/components/enterprise/advanced-employee-management';
 
 export default function ClientEmployees() {
   const { data: session, status } = useSession();
@@ -38,7 +38,10 @@ export default function ClientEmployees() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <EmployeeDirectory userRole={session.user.role} />
+        <AdvancedEmployeeManagement 
+          userRole={session.user.role as any} 
+          userDepartment="Trading" // This would come from user's actual department
+        />
       </main>
     </div>
   );

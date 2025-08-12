@@ -20,7 +20,7 @@ const performanceSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user || !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     const performances = await prisma.employeePerformance.findMany({
       where: {
-        ...(employeeId && session.user.role === 'ADMIN' ? {
+        ...(employeeId && ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role) ? {
           employeeId,
         } : session.user.role === 'EMPLOYEE' ? {
           employeeId: session.user.id,

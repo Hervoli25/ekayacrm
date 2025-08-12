@@ -60,7 +60,7 @@ export function EmployeeTable({
           <UsersIcon className="mx-auto h-12 w-12 text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No employees found</h3>
           <p className="text-gray-500">
-            {['SUPER_ADMIN', 'ADMIN', 'HR_DIRECTOR'].includes(userRole)
+            {['DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER'].includes(userRole)
               ? 'Get started by adding your first employee.' 
               : 'No employees match your search criteria.'}
           </p>
@@ -84,7 +84,7 @@ export function EmployeeTable({
                 <TableHead>Phone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Hire Date</TableHead>
-                {['SUPER_ADMIN', 'ADMIN', 'HR_DIRECTOR', 'MANAGER'].includes(userRole) && <TableHead>Actions</TableHead>}
+                {['DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER', 'SUPERVISOR'].includes(userRole) && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -146,7 +146,7 @@ export function EmployeeTable({
                       </span>
                     </div>
                   </TableCell>
-                  {['SUPER_ADMIN', 'ADMIN', 'HR_DIRECTOR', 'MANAGER'].includes(userRole) && (
+                  {['DIRECTOR', 'HR_MANAGER', 'DEPARTMENT_MANAGER', 'SUPERVISOR'].includes(userRole) && (
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button
@@ -157,7 +157,7 @@ export function EmployeeTable({
                         >
                           <Edit className="h-3 w-3" />
                         </Button>
-                        {['SUPER_ADMIN', 'ADMIN'].includes(userRole) && (
+                        {['DIRECTOR', 'HR_MANAGER'].includes(userRole) && (
                           <Button
                             variant="outline"
                             size="sm"
