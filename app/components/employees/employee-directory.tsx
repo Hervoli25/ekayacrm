@@ -36,6 +36,7 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
 
   const fetchEmployees = async () => {
     try {
+      console.log('Fetching employees...');
       const params = new URLSearchParams({
         search: searchTerm,
         sortBy,
@@ -45,9 +46,18 @@ export function EmployeeDirectory({ userRole }: EmployeeDirectoryProps) {
       const response = await fetch(`/api/employees?${params}`);
       const data = await response.json();
       
+      console.log('Employee fetch response:', { 
+        ok: response.ok, 
+        status: response.status, 
+        employeeCount: data.employees?.length || 0,
+        data 
+      });
+      
       if (response.ok) {
         setEmployees(data.employees || []);
+        console.log('Employees set successfully:', data.employees?.length || 0);
       } else {
+        console.error('Failed to fetch employees:', data);
         toast.error('Failed to fetch employees');
       }
     } catch (error) {

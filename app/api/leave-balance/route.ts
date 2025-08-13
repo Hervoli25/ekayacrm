@@ -25,28 +25,46 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
     }
 
-    // Calculate leave balance based on role and tenure
+    // Use enhanced leave calculation for consistency
     const hireDate = new Date(employee.hireDate);
     const now = new Date();
-    const yearsOfService = Math.floor((now.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24 * 365));
+    const yearsOfService = Math.floor((now.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+    const userRole = employee.user.role;
 
-    // Base annual leave allocation
-    let annualLeave = 21; // Standard 21 days
-    if (yearsOfService >= 5) annualLeave = 25; // Senior employees get more
-    if (yearsOfService >= 10) annualLeave = 30; // Long service bonus
-    
-    // Role-based bonuses
-    const roleBonuses = {
-      'DIRECTOR': 10,
-      'HR_MANAGER': 5,
-      'DEPARTMENT_MANAGER': 3,
-      'SUPERVISOR': 1,
-      'SENIOR_EMPLOYEE': 1,
-      'EMPLOYEE': 0,
-      'INTERN': -6 // Interns get less
-    };
+    // Calculate annual leave based on role and tenure (South African compliant)
+    let annualLeave = 21; // BCEA minimum
 
-    annualLeave += roleBonuses[employee.user.role] || 0;
+    // Managerial positions get enhanced leave
+    const managerialRoles = ['DIRECTOR', 'HR_DIRECTOR', 'DEPARTMENT_MANAGER', 'HR_MANAGER', 'SUPERVISOR'];
+    const isManagerial = managerialRoles.includes(userRole);
+
+    if (isManagerial) {
+      switch (userRole) {
+        case 'DIRECTOR':
+        case 'HR_DIRECTOR':
+          annualLeave = 30; // Senior management
+          break;
+        case 'DEPARTMENT_MANAGER':
+        case 'HR_MANAGER':
+          annualLeave = 27; // Middle management
+          break;
+        case 'SUPERVISOR':
+          annualLeave = 25; // First-line management
+          break;
+      }
+    } else {
+      // Non-managerial progression
+      if (yearsOfService >= 1) annualLeave = 21;
+      if (yearsOfService >= 5) annualLeave = 25;
+      if (yearsOfService >= 10) annualLeave = 30;
+      if (yearsOfService >= 15) annualLeave = 32;
+      if (yearsOfService >= 20) annualLeave = 35;
+    }
+
+    // Special role adjustments
+    if (userRole === 'SUPER_ADMIN') annualLeave = 35;
+    if (userRole === 'SENIOR_EMPLOYEE') annualLeave += 2;
+    if (userRole === 'INTERN') annualLeave = Math.max(15, annualLeave - 6);
 
     // Calculate used leave for current year
     const currentYear = now.getFullYear();

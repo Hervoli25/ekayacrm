@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Role } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 
 interface User {
   id: string;
@@ -87,6 +88,7 @@ const ROLE_ICONS = {
 
 export function UsersManagementTab() {
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,8 @@ export function UsersManagementTab() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
+  const currentUserRole = session?.user?.role;
 
   useEffect(() => {
     fetchUsers();
@@ -274,7 +278,9 @@ export function UsersManagementTab() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                  {currentUserRole === 'SUPER_ADMIN' && (
+                    <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                  )}
                   <SelectItem value="DIRECTOR">Director</SelectItem>
                   <SelectItem value="HR_MANAGER">HR Manager</SelectItem>
                   <SelectItem value="DEPARTMENT_MANAGER">Dept Manager</SelectItem>

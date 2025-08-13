@@ -31,8 +31,25 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // Filter out SUPER_ADMIN users for non-super-admin users
+    let userFilter = {};
+    if (session.user.role !== 'SUPER_ADMIN') {
+      userFilter = {
+        user: {
+          role: {
+            not: 'SUPER_ADMIN'
+          }
+        }
+      };
+    }
+
+    // Combine where conditions
+    const finalWhere = Object.keys(where).length > 0 
+      ? { AND: [where, userFilter] }
+      : userFilter;
+
     const employees = await prisma.employee.findMany({
-      where,
+      where: finalWhere,
       orderBy: {
         [sortBy]: sortOrder,
       },
@@ -126,44 +143,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create user account for the employee
-    const hashedPassword = await require('bcryptjs').hash('password123', 12);
-    
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-        role: 'EMPLOYEE'
-      }
-    });
+    // Use transaction to ensure both user and employee are created together or both fail
+    const employee = await prisma.$transaction(async (tx) => {
+      console.log('Starting transaction for employee creation...');
+      
+      // Create user account for the employee
+      const hashedPassword = await require('bcryptjs').hash('password123', 12);
+      
+      const user = await tx.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPassword,
+          role: 'EMPLOYEE'
+        }
+      });
+      console.log('User created successfully:', user.id);
 
-    // Create employee record
-    const employee = await prisma.employee.create({
-      data: {
-        userId: user.id,
-        employeeId,
-        name,
-        title,
-        department,
-        email,
-        phone: phone || null,
-        address: address || null,
-        emergencyContact: emergencyContact || null,
-        emergencyPhone: emergencyPhone || null,
-        salary: salary ? parseFloat(salary) : null,
-        hireDate: hireDate ? new Date(hireDate) : new Date(),
-        status: 'ACTIVE'
-      },
-      include: {
-        user: {
-          select: {
-            role: true,
+      // Create employee record
+      const employee = await tx.employee.create({
+        data: {
+          userId: user.id,
+          employeeId,
+          name,
+          title,
+          department,
+          email,
+          phone: phone || null,
+          address: address || null,
+          emergencyContact: emergencyContact || null,
+          emergencyPhone: emergencyPhone || null,
+          salary: salary ? parseFloat(salary) : null,
+          hireDate: hireDate ? new Date(hireDate) : new Date(),
+          status: 'ACTIVE'
+        },
+        include: {
+          user: {
+            select: {
+              role: true,
+            },
           },
         },
-      },
+      });
+      console.log('Employee created successfully:', employee.id);
+
+      return employee;
     });
 
+    console.log('Transaction completed successfully');
     return NextResponse.json(employee, { status: 201 });
   } catch (error) {
     console.error('Create employee error:', error);

@@ -87,27 +87,49 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
+    // Build the where clause with super admin filtering
+    let whereClause: any = {};
+    
+    // Filter by employee ID based on role
+    if (employeeId && ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+      whereClause.employeeId = employeeId;
+    } else if (session.user.role === 'EMPLOYEE') {
+      whereClause.employeeId = session.user.id;
+    }
+    
+    // Add date filtering if provided
+    if (startDate && endDate) {
+      whereClause.dailyReport = {
+        date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      };
+    }
+    
+    // Filter out SUPER_ADMIN performance data for non-super-admin users
+    if (session.user.role !== 'SUPER_ADMIN') {
+      whereClause.employee = {
+        user: {
+          role: {
+            not: 'SUPER_ADMIN'
+          }
+        }
+      };
+    }
+
     const performances = await prisma.employeePerformance.findMany({
-      where: {
-        ...(employeeId && ['ADMIN', 'SUPER_ADMIN'].includes(session.user.role) ? {
-          employeeId,
-        } : session.user.role === 'EMPLOYEE' ? {
-          employeeId: session.user.id,
-        } : {}),
-        ...(startDate && endDate ? {
-          dailyReport: {
-            date: {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
-            },
-          },
-        } : {}),
-      },
+      where: whereClause,
       include: {
         employee: {
           select: {
             name: true,
             email: true,
+            user: {
+              select: {
+                role: true
+              }
+            }
           },
         },
         dailyReport: {

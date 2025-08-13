@@ -13,25 +13,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Filter out SUPER_ADMIN users for non-super-admin users
+    let userFilter = {};
+    let roleFilter = {};
+    let departmentFilter = {};
+    
+    if (session.user.role !== 'SUPER_ADMIN') {
+      userFilter = {
+        role: { not: 'SUPER_ADMIN' }
+      };
+      roleFilter = {
+        role: { not: 'SUPER_ADMIN' }
+      };
+      departmentFilter = {
+        user: {
+          role: { not: 'SUPER_ADMIN' }
+        }
+      };
+    }
+
     // Get user statistics
-    const totalUsers = await prisma.user.count();
+    const totalUsers = await prisma.user.count({
+      where: userFilter
+    });
     
     const activeUsers = await prisma.user.count({
-      where: { isActive: true }
+      where: { 
+        isActive: true,
+        ...userFilter 
+      }
     });
 
     const lockedUsers = await prisma.user.count({
       where: {
         lockoutUntil: {
           gt: new Date()
-        }
+        },
+        ...userFilter
       }
     });
 
     const adminUsers = await prisma.user.count({
       where: {
         role: {
-          in: ['SUPER_ADMIN', 'DIRECTOR', 'HR_MANAGER']
+          in: session.user.role === 'SUPER_ADMIN' 
+            ? ['SUPER_ADMIN', 'DIRECTOR', 'HR_MANAGER']
+            : ['DIRECTOR', 'HR_MANAGER']
         }
       }
     });
@@ -41,13 +68,15 @@ export async function GET(request: NextRequest) {
       where: {
         lastLogin: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
-        }
+        },
+        ...userFilter
       }
     });
 
     // Users by role
     const usersByRole = await prisma.user.groupBy({
       by: ['role'],
+      where: roleFilter,
       _count: {
         id: true
       }
@@ -61,6 +90,7 @@ export async function GET(request: NextRequest) {
     // Users by department (from employee records)
     const usersByDepartment = await prisma.employee.groupBy({
       by: ['department'],
+      where: departmentFilter,
       _count: {
         id: true
       }

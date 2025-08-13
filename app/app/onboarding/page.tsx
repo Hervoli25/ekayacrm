@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import { Navbar } from '@/components/layout/navbar';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { CarWashOnboarding } from '@/components/onboarding/car-wash-onboarding';
 
 export default async function OnboardingPage() {
@@ -12,11 +12,8 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="py-6">
-        <CarWashOnboarding />
-      </main>
-    </div>
+    <DashboardLayout>
+      <CarWashOnboarding />
+    </DashboardLayout>
   );
 }

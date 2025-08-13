@@ -17,6 +17,7 @@ import { showSuccess, showError, showLoading } from '@/lib/sweetalert';
 import Swal from 'sweetalert2';
 import { CredentialsManager } from '@/components/admin/credentials-manager';
 import { DirectorCreationForm } from '@/components/enterprise/director-creation-form';
+import { SystemManagementTab } from '@/components/dashboard/system-management-tab';
 import {
   Users,
   Calendar,
@@ -602,128 +603,7 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Server className="h-5 w-5 text-blue-600" />
-                  <span>Server Health</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Uptime</span>
-                    <Badge className="bg-green-100 text-green-800">{systemStats.uptime}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Status</span>
-                    <Badge className="bg-green-100 text-green-800">Healthy</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Load Average</span>
-                    <span className="text-sm font-medium">0.45</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Database className="h-5 w-5 text-green-600" />
-                  <span>Database</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Connections</span>
-                    <span className="text-sm font-medium">{systemStats.databaseConnections}/100</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Query Time</span>
-                    <span className="text-sm font-medium">2.3ms avg</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Storage</span>
-                    <span className="text-sm font-medium">1.2GB / 10GB</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Wifi className="h-5 w-5 text-purple-600" />
-                  <span>Network</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Bandwidth</span>
-                    <span className="text-sm font-medium">45 Mbps</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Latency</span>
-                    <span className="text-sm font-medium">12ms</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Status</span>
-                    <Badge className="bg-green-100 text-green-800">Stable</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5 text-orange-600" />
-                <span>Resource Usage</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                      <Cpu className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold">{systemStats.cpuUsage}%</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium">CPU Usage</p>
-                </div>
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                      <MemoryStick className="h-8 w-8 text-green-600" />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold">{systemStats.memoryUsage}%</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium">Memory Usage</p>
-                </div>
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                      <HardDrive className="h-8 w-8 text-purple-600" />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold">{systemStats.diskUsage}%</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium">Disk Usage</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <SystemManagementTab />
         </TabsContent>
 
         <TabsContent value="hr" className="space-y-6">

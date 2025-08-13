@@ -10,15 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Building2, 
-  User, 
-  LogOut, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  BarChart3, 
-  Receipt, 
+import {
+  Building2,
+  User,
+  LogOut,
+  Users,
+  Calendar,
+  DollarSign,
+  BarChart3,
+  Receipt,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -32,7 +32,8 @@ import {
   UserCheck,
   Bell,
   HelpCircle,
-  Key
+  Key,
+  BookOpen
 } from 'lucide-react';
 import { AnimatedBrand } from '@/components/ui/animated-brand';
 import Link from 'next/link';
@@ -73,6 +74,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       title: 'HR Management',
       items: [
         { name: 'Employees', href: '/employees', icon: Users, color: 'text-purple-600' },
+        { name: 'Onboarding', href: '/onboarding', icon: BookOpen, color: 'text-blue-600' },
         { name: 'Leave Requests', href: '/leave-requests', icon: Calendar, color: 'text-orange-600' },
         { name: 'Performance', href: '/performance', icon: Award, color: 'text-yellow-600' },
         { name: 'Recruitment', href: '/recruitment', icon: UserCheck, color: 'text-indigo-600' },

@@ -13,7 +13,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Filter out SUPER_ADMIN users for non-super-admin users
+    let whereClause = {};
+    if (session.user.role !== 'SUPER_ADMIN') {
+      whereClause = {
+        role: {
+          not: 'SUPER_ADMIN'
+        }
+      };
+    }
+
     const users = await prisma.user.findMany({
+      where: whereClause,
       select: {
         id: true,
         name: true,

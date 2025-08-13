@@ -30,6 +30,7 @@ import {
   Thermometer
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { CascadeDeleteTool } from '@/components/admin/cascade-delete-tool';
 
 interface SystemMetrics {
   server: {
@@ -795,6 +796,11 @@ export function SystemManagementTab() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Database Management Tools - SUPER ADMIN Only */}
+      <div className="mt-8">
+        <CascadeDeleteTool />
       </div>
     </div>
   );

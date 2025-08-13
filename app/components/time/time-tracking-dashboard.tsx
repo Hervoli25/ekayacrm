@@ -129,7 +129,7 @@ export function TimeTrackingDashboard() {
   const handleClockIn = async () => {
     try {
       console.log('Starting clock in process...');
-      showLoading('Clocking In...', 'Recording your start time');
+      showLoading('Clocking In...', 'Recording your start time and location');
       
       const location = await getCurrentLocation();
       console.log('Got location:', location);
@@ -157,11 +157,22 @@ export function TimeTrackingDashboard() {
       } else {
         const error = await response.json();
         console.log('Clock in error response:', error);
-        await showError('Clock In Failed', error.details || error.message || error.error || 'Failed to clock in');
+        let errorMessage = 'Failed to clock in. Please try again.';
+        
+        if (error.error === 'You already have an active time entry. Please clock out first.') {
+          errorMessage = 'You are already clocked in. Please clock out before clocking in again.';
+        } else if (error.details) {
+          errorMessage = error.details;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        await showError('Clock In Failed', errorMessage);
       }
     } catch (error) {
       Swal.close();
-      await showError('Clock In Error', 'Failed to clock in. Please try again.');
+      console.error('Clock in catch error:', error);
+      await showError('Clock In Error', 'Network error or system issue. Please check your connection and try again.');
     }
   };
 
@@ -239,8 +250,28 @@ export function TimeTrackingDashboard() {
           (position) => {
             resolve(`${position.coords.latitude},${position.coords.longitude}`);
           },
-          () => {
-            resolve('Location not available');
+          (error) => {
+            console.log('Location error:', error);
+            // Handle different error types gracefully
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                resolve('Location access denied by user');
+                break;
+              case error.POSITION_UNAVAILABLE:
+                resolve('Location information unavailable');
+                break;
+              case error.TIMEOUT:
+                resolve('Location request timed out');
+                break;
+              default:
+                resolve('Location not available');
+                break;
+            }
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: 10000,
+            maximumAge: 600000 // 10 minutes
           }
         );
       } else {

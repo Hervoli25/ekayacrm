@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Car, 
-  Droplets, 
-  Shield, 
-  Users, 
-  CheckCircle, 
-  Clock, 
+import {
+  Car,
+  Droplets,
+  Shield,
+  Users,
+  CheckCircle,
+  Clock,
   Star,
   Award,
   AlertTriangle,
@@ -20,9 +20,24 @@ import {
   BookOpen,
   Sparkles,
   Zap,
-  Heart
+  Heart,
+  Video,
+  Download,
+  FileText,
+  HelpCircle,
+  Target,
+  Trophy
 } from 'lucide-react';
 import { showSuccess, showConfirmation } from '@/lib/sweetalert';
+import { CompletionCertificate } from './completion-certificate';
+
+interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
 
 interface OnboardingStep {
   id: string;
@@ -36,6 +51,9 @@ interface OnboardingStep {
     keyPoints: string[];
     practicalTips: string[];
     safetyNotes?: string[];
+    quiz?: QuizQuestion[];
+    videoUrl?: string;
+    downloadableResources?: { name: string; url: string; type: string }[];
   };
 }
 
@@ -43,6 +61,12 @@ export function CarWashOnboarding() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [isStarted, setIsStarted] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<{[key: string]: number}>({});
+  const [showQuizResults, setShowQuizResults] = useState(false);
+  const [currentQuizScore, setCurrentQuizScore] = useState(0);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [overallScore, setOverallScore] = useState(0);
+  const [stepScores, setStepScores] = useState<{[key: string]: number}>({});
 
   const onboardingSteps: OnboardingStep[] = [
     {
@@ -66,6 +90,27 @@ export function CarWashOnboarding() {
           'Maintain professional appearance',
           'Ask about customer preferences',
           'Explain services clearly'
+        ],
+        videoUrl: 'https://example.com/welcome-video',
+        downloadableResources: [
+          { name: 'Employee Handbook', url: '/resources/handbook.pdf', type: 'PDF' },
+          { name: 'Company Values Poster', url: '/resources/values.pdf', type: 'PDF' }
+        ],
+        quiz: [
+          {
+            id: 'q1',
+            question: 'What is the most important aspect of Prestige Car Wash service?',
+            options: ['Speed', 'Customer satisfaction', 'Cost efficiency', 'Equipment maintenance'],
+            correctAnswer: 1,
+            explanation: 'Customer satisfaction is our top priority and drives all our service decisions.'
+          },
+          {
+            id: 'q2',
+            question: 'How should you greet every customer?',
+            options: ['With a nod', 'With a smile and professional greeting', 'Silently', 'Only if they speak first'],
+            correctAnswer: 1,
+            explanation: 'A warm smile and professional greeting sets the tone for excellent service.'
+          }
         ]
       }
     },
@@ -96,6 +141,35 @@ export function CarWashOnboarding() {
           '⚠️ Always read chemical labels before use',
           '⚠️ Keep first aid kit locations in mind',
           '⚠️ Report accidents immediately to supervisor'
+        ],
+        videoUrl: 'https://example.com/safety-training-video',
+        downloadableResources: [
+          { name: 'Safety Checklist', url: '/resources/safety-checklist.pdf', type: 'PDF' },
+          { name: 'Emergency Procedures', url: '/resources/emergency.pdf', type: 'PDF' },
+          { name: 'Chemical Safety Data Sheets', url: '/resources/msds.pdf', type: 'PDF' }
+        ],
+        quiz: [
+          {
+            id: 'safety1',
+            question: 'What should you do before handling any cleaning chemical?',
+            options: ['Mix it with water', 'Read the safety label', 'Smell it first', 'Ask a colleague'],
+            correctAnswer: 1,
+            explanation: 'Always read safety labels to understand proper handling, dilution, and safety precautions.'
+          },
+          {
+            id: 'safety2',
+            question: 'If you accidentally mix two different chemicals, what should you do?',
+            options: ['Continue using the mixture', 'Add more water', 'Stop immediately and report to supervisor', 'Test it on a small area'],
+            correctAnswer: 2,
+            explanation: 'Never mix chemicals as this can create dangerous reactions. Stop immediately and report to your supervisor.'
+          },
+          {
+            id: 'safety3',
+            question: 'What PPE is required when handling cleaning chemicals?',
+            options: ['Just gloves', 'Safety goggles and gloves', 'Only an apron', 'No PPE needed'],
+            correctAnswer: 1,
+            explanation: 'Safety goggles protect your eyes and gloves protect your skin from chemical contact.'
+          }
         ]
       }
     },
@@ -120,6 +194,28 @@ export function CarWashOnboarding() {
           'Explain the benefits of each service level',
           'Suggest seasonal protection services',
           'Upsell appropriately without being pushy'
+        ],
+        videoUrl: 'https://example.com/services-overview-video',
+        downloadableResources: [
+          { name: 'Service Menu & Pricing', url: '/resources/service-menu.pdf', type: 'PDF' },
+          { name: 'Upselling Guide', url: '/resources/upselling-guide.pdf', type: 'PDF' },
+          { name: 'Seasonal Services Calendar', url: '/resources/seasonal-services.pdf', type: 'PDF' }
+        ],
+        quiz: [
+          {
+            id: 'services1',
+            question: 'Which service package includes interior cleaning?',
+            options: ['Basic Wash', 'Premium Wash', 'Express Rinse', 'Exterior Only'],
+            correctAnswer: 1,
+            explanation: 'Premium Wash includes both interior and exterior cleaning services.'
+          },
+          {
+            id: 'services2',
+            question: 'When should you recommend wax protection?',
+            options: ['Never', 'Only in winter', 'For all vehicles year-round', 'Only for new cars'],
+            correctAnswer: 2,
+            explanation: 'Wax protection benefits all vehicles year-round by protecting paint from UV rays, dirt, and weather.'
+          }
         ]
       }
     },
@@ -204,6 +300,29 @@ export function CarWashOnboarding() {
 
   const progress = (completedSteps.length / onboardingSteps.length) * 100;
 
+  const handleQuizAnswer = (questionId: string, answerIndex: number) => {
+    setQuizAnswers(prev => ({
+      ...prev,
+      [questionId]: answerIndex
+    }));
+  };
+
+  const calculateQuizScore = (quiz: QuizQuestion[]) => {
+    let correct = 0;
+    quiz.forEach(question => {
+      if (quizAnswers[question.id] === question.correctAnswer) {
+        correct++;
+      }
+    });
+    return Math.round((correct / quiz.length) * 100);
+  };
+
+  const handleQuizSubmit = (quiz: QuizQuestion[]) => {
+    const score = calculateQuizScore(quiz);
+    setCurrentQuizScore(score);
+    setShowQuizResults(true);
+  };
+
   const handleStepComplete = async (stepId: string) => {
     const result = await showConfirmation(
       'Complete Step',
@@ -213,14 +332,35 @@ export function CarWashOnboarding() {
     );
 
     if (result.isConfirmed) {
+      // Save quiz score for this step if available
+      const currentStepData = onboardingSteps[currentStep];
+      if (currentStepData.content.quiz && showQuizResults) {
+        setStepScores(prev => ({
+          ...prev,
+          [stepId]: currentQuizScore
+        }));
+      }
+
       setCompletedSteps(prev => [...prev, stepId]);
+
       if (currentStep < onboardingSteps.length - 1) {
         setCurrentStep(prev => prev + 1);
+        // Reset quiz state for next step
+        setShowQuizResults(false);
+        setQuizAnswers({});
+        setCurrentQuizScore(0);
       } else {
+        // Calculate overall score
+        const totalScore = Object.values(stepScores).reduce((sum, score) => sum + score, 0);
+        const avgScore = Math.round(totalScore / Object.keys(stepScores).length) || 0;
+        setOverallScore(avgScore);
+
         await showSuccess(
           'Onboarding Complete!',
-          'Congratulations! You\'ve completed the Prestige Car Wash onboarding program. Welcome to the team!'
+          'Congratulations! You\'ve completed the Prestige Car Wash onboarding program. Your certificate is ready!'
         );
+
+        setShowCertificate(true);
       }
     }
   };
@@ -274,6 +414,19 @@ export function CarWashOnboarding() {
           </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  // Show certificate if onboarding is complete
+  if (showCertificate) {
+    return (
+      <CompletionCertificate
+        employeeName="Employee Name" // This should come from session/props
+        completionDate={new Date().toISOString()}
+        totalSteps={onboardingSteps.length}
+        completedSteps={completedSteps.length}
+        overallScore={overallScore}
+      />
     );
   }
 
@@ -335,6 +488,18 @@ export function CarWashOnboarding() {
                       {step.title}
                     </p>
                     <p className="text-xs text-gray-500">{step.duration}</p>
+                    {completedSteps.includes(step.id) && (
+                      <div className="mt-1">
+                        <p className="text-xs text-green-600">
+                          ✓ Completed
+                        </p>
+                        {stepScores[step.id] && (
+                          <p className="text-xs text-blue-600">
+                            Quiz: {stepScores[step.id]}%
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -358,12 +523,18 @@ export function CarWashOnboarding() {
             </CardHeader>
             <CardContent className="p-6">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="keypoints">Key Points</TabsTrigger>
-                  <TabsTrigger value="tips">Practical Tips</TabsTrigger>
+                  <TabsTrigger value="tips">Tips</TabsTrigger>
                   {currentStepData.content.safetyNotes && (
                     <TabsTrigger value="safety">Safety</TabsTrigger>
+                  )}
+                  {currentStepData.content.videoUrl && (
+                    <TabsTrigger value="video">Video</TabsTrigger>
+                  )}
+                  {currentStepData.content.quiz && (
+                    <TabsTrigger value="quiz">Quiz</TabsTrigger>
                   )}
                 </TabsList>
 
@@ -406,6 +577,169 @@ export function CarWashOnboarding() {
                           <p className="text-gray-700">{note}</p>
                         </div>
                       ))}
+                    </div>
+                  </TabsContent>
+                )}
+
+                {/* Video Tab */}
+                {currentStepData.content.videoUrl && (
+                  <TabsContent value="video" className="mt-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                      <div className="flex items-center mb-4">
+                        <Video className="h-6 w-6 text-blue-600 mr-2" />
+                        <h3 className="text-lg font-semibold text-gray-900">Training Video</h3>
+                      </div>
+                      <div className="bg-gray-200 rounded-lg p-8 text-center">
+                        <Video className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-4">Interactive training video for {currentStepData.title}</p>
+                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+                          <Play className="h-4 w-4 mr-2" />
+                          Play Video
+                        </Button>
+                      </div>
+
+                      {/* Downloadable Resources */}
+                      {currentStepData.content.downloadableResources && (
+                        <div className="mt-6">
+                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                            <Download className="h-5 w-5 mr-2 text-green-600" />
+                            Downloadable Resources
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {currentStepData.content.downloadableResources.map((resource, index) => (
+                              <div key={index} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                                <FileText className="h-5 w-5 text-blue-600 mr-3" />
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900">{resource.name}</p>
+                                  <p className="text-sm text-gray-500">{resource.type}</p>
+                                </div>
+                                <Button variant="outline" size="sm">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                )}
+
+                {/* Quiz Tab */}
+                {currentStepData.content.quiz && (
+                  <TabsContent value="quiz" className="mt-6">
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg">
+                      <div className="flex items-center mb-4">
+                        <HelpCircle className="h-6 w-6 text-green-600 mr-2" />
+                        <h3 className="text-lg font-semibold text-gray-900">Knowledge Check</h3>
+                        <Badge variant="outline" className="ml-auto text-green-600 border-green-200">
+                          {currentStepData.content.quiz.length} Questions
+                        </Badge>
+                      </div>
+
+                      {!showQuizResults ? (
+                        <div className="space-y-6">
+                          {currentStepData.content.quiz.map((question, qIndex) => (
+                            <div key={question.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                              <h4 className="font-medium text-gray-900 mb-3">
+                                {qIndex + 1}. {question.question}
+                              </h4>
+                              <div className="space-y-2">
+                                {question.options.map((option, oIndex) => (
+                                  <label key={oIndex} className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name={question.id}
+                                      value={oIndex}
+                                      onChange={() => handleQuizAnswer(question.id, oIndex)}
+                                      className="mr-3 text-green-600"
+                                    />
+                                    <span className="text-gray-700">{option}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+
+                          <div className="text-center">
+                            <Button
+                              onClick={() => handleQuizSubmit(currentStepData.content.quiz!)}
+                              className="bg-gradient-to-r from-green-600 to-emerald-600"
+                              disabled={Object.keys(quizAnswers).length < currentStepData.content.quiz.length}
+                            >
+                              <Target className="h-4 w-4 mr-2" />
+                              Submit Quiz
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="mb-6">
+                            <Trophy className={`h-16 w-16 mx-auto mb-4 ${
+                              currentQuizScore >= 80 ? 'text-green-600' : currentQuizScore >= 60 ? 'text-yellow-600' : 'text-red-600'
+                            }`} />
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Quiz Complete!</h3>
+                            <p className="text-lg text-gray-600">Your Score: {currentQuizScore}%</p>
+                            <Badge className={`mt-2 ${
+                              currentQuizScore >= 80 ? 'bg-green-100 text-green-800' :
+                              currentQuizScore >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {currentQuizScore >= 80 ? 'Excellent!' : currentQuizScore >= 60 ? 'Good Job!' : 'Needs Review'}
+                            </Badge>
+                          </div>
+
+                          {/* Quiz Results */}
+                          <div className="space-y-4 text-left">
+                            {currentStepData.content.quiz.map((question, index) => {
+                              const userAnswer = quizAnswers[question.id];
+                              const isCorrect = userAnswer === question.correctAnswer;
+
+                              return (
+                                <div key={question.id} className={`p-4 rounded-lg border-l-4 ${
+                                  isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'
+                                }`}>
+                                  <div className="flex items-start">
+                                    {isCorrect ? (
+                                      <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-0.5" />
+                                    ) : (
+                                      <AlertTriangle className="h-5 w-5 text-red-600 mr-2 mt-0.5" />
+                                    )}
+                                    <div className="flex-1">
+                                      <p className="font-medium text-gray-900 mb-1">{question.question}</p>
+                                      <p className="text-sm text-gray-600 mb-2">
+                                        Your answer: {question.options[userAnswer]}
+                                        {!isCorrect && (
+                                          <span className="text-red-600"> (Incorrect)</span>
+                                        )}
+                                      </p>
+                                      {!isCorrect && (
+                                        <p className="text-sm text-green-600 mb-2">
+                                          Correct answer: {question.options[question.correctAnswer]}
+                                        </p>
+                                      )}
+                                      <p className="text-sm text-gray-700 italic">{question.explanation}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="mt-6">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setShowQuizResults(false);
+                                setQuizAnswers({});
+                                setCurrentQuizScore(0);
+                              }}
+                            >
+                              Retake Quiz
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
                 )}

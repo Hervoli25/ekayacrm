@@ -81,12 +81,13 @@ async function calculateLeaveEntitlements(employee: any, year: number) {
   const hireDate = new Date(employee.hireDate);
   const currentDate = new Date();
   const yearsOfService = Math.floor((currentDate.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-  
-  // Base entitlements by leave type
+  const userRole = employee.user.role;
+
+  // Base entitlements by leave type (South African Labor Law compliant)
   let entitlements = {
-    VACATION: 21, // Standard annual leave
+    VACATION: 21, // Standard annual leave (BCEA minimum)
     SICK_LEAVE: 30, // As per South African Basic Conditions of Employment Act
-    PERSONAL: 3, // Personal/family responsibility days
+    PERSONAL: 3, // Personal/family responsibility days (BCEA)
     EMERGENCY: 0, // No fixed allocation
     MATERNITY: 120, // 4 months (South African law)
     PATERNITY: 10, // South African paternity leave
@@ -95,29 +96,58 @@ async function calculateLeaveEntitlements(employee: any, year: number) {
     UNPAID_LEAVE: 0 // No limit but unpaid
   };
 
-  // Adjust vacation days based on years of service
-  if (yearsOfService >= 1) entitlements.VACATION = 21;
-  if (yearsOfService >= 5) entitlements.VACATION = 25;
-  if (yearsOfService >= 10) entitlements.VACATION = 30;
-  if (yearsOfService >= 15) entitlements.VACATION = 32;
-  if (yearsOfService >= 20) entitlements.VACATION = 35;
+  // Managerial positions get enhanced leave as per South African labor practices
+  // These are cadre positions with additional responsibilities
+  const managerialRoles = ['DIRECTOR', 'HR_DIRECTOR', 'DEPARTMENT_MANAGER', 'HR_MANAGER', 'SUPERVISOR'];
+  const isManagerial = managerialRoles.includes(userRole);
 
-  // Role-based adjustments
-  const roleAdjustments = {
-    'SUPER_ADMIN': { VACATION: 15, PERSONAL: 5 },
-    'DIRECTOR': { VACATION: 10, PERSONAL: 3, STUDY_LEAVE: 15 },
-    'HR_MANAGER': { VACATION: 5, PERSONAL: 2, STUDY_LEAVE: 10 },
-    'DEPARTMENT_MANAGER': { VACATION: 3, PERSONAL: 1, STUDY_LEAVE: 5 },
-    'SUPERVISOR': { VACATION: 2, STUDY_LEAVE: 3 },
-    'SENIOR_EMPLOYEE': { VACATION: 1, STUDY_LEAVE: 2 },
-    'EMPLOYEE': {},
+  if (isManagerial) {
+    // Managerial positions typically get 25-30 days as standard practice
+    switch (userRole) {
+      case 'DIRECTOR':
+      case 'HR_DIRECTOR':
+        entitlements.VACATION = 30; // Senior management
+        entitlements.PERSONAL = 5;
+        entitlements.STUDY_LEAVE = 15;
+        break;
+      case 'DEPARTMENT_MANAGER':
+      case 'HR_MANAGER':
+        entitlements.VACATION = 27; // Middle management
+        entitlements.PERSONAL = 4;
+        entitlements.STUDY_LEAVE = 10;
+        break;
+      case 'SUPERVISOR':
+        entitlements.VACATION = 25; // First-line management
+        entitlements.PERSONAL = 3;
+        entitlements.STUDY_LEAVE = 5;
+        break;
+    }
+  } else {
+    // Non-managerial positions follow standard progression
+    if (yearsOfService >= 1) entitlements.VACATION = 21;
+    if (yearsOfService >= 5) entitlements.VACATION = 25;
+    if (yearsOfService >= 10) entitlements.VACATION = 30;
+    if (yearsOfService >= 15) entitlements.VACATION = 32;
+    if (yearsOfService >= 20) entitlements.VACATION = 35;
+  }
+
+  // Special role adjustments
+  const specialAdjustments = {
+    'SUPER_ADMIN': { VACATION: 35, PERSONAL: 7, STUDY_LEAVE: 20 }, // Executive level
+    'SENIOR_EMPLOYEE': { VACATION: 2, STUDY_LEAVE: 3 }, // Senior staff bonus
     'INTERN': { VACATION: -6, SICK_LEAVE: 10 } // Interns get reduced entitlements
   };
 
-  const adjustments = roleAdjustments[employee.user.role] || {};
-  Object.keys(adjustments).forEach(leaveType => {
-    entitlements[leaveType] += adjustments[leaveType];
-  });
+  if (specialAdjustments[userRole]) {
+    const adjustments = specialAdjustments[userRole];
+    Object.keys(adjustments).forEach(leaveType => {
+      if (leaveType === 'VACATION' && adjustments[leaveType] > entitlements[leaveType]) {
+        entitlements[leaveType] = adjustments[leaveType]; // Set to higher value
+      } else {
+        entitlements[leaveType] += adjustments[leaveType];
+      }
+    });
+  }
 
   // Ensure no negative values
   Object.keys(entitlements).forEach(key => {
@@ -200,26 +230,60 @@ async function calculateAccruedLeave(employee: any, year: number) {
   const hireDate = new Date(employee.hireDate);
   const currentDate = new Date();
   const yearStart = new Date(year, 0, 1);
-  
-  // If employee started this year, calculate pro-rated entitlement
+  const yearEnd = new Date(year, 11, 31);
+
+  // Determine the start date for accrual calculation
   const startOfAccrual = hireDate > yearStart ? hireDate : yearStart;
-  const monthsWorked = Math.max(1, 
-    ((currentDate.getTime() - startOfAccrual.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
-  );
+  const endOfAccrual = currentDate < yearEnd ? currentDate : yearEnd;
+
+  // Calculate exact months worked (more accurate than previous calculation)
+  const startMonth = startOfAccrual.getMonth();
+  const startYear = startOfAccrual.getFullYear();
+  const endMonth = endOfAccrual.getMonth();
+  const endYear = endOfAccrual.getFullYear();
+
+  let monthsWorked = (endYear - startYear) * 12 + (endMonth - startMonth);
+
+  // Add partial month if employee started mid-month
+  const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate();
+  const daysWorkedInStartMonth = daysInStartMonth - startOfAccrual.getDate() + 1;
+  const partialMonth = daysWorkedInStartMonth / daysInStartMonth;
+
+  // Add partial current month
+  const daysInCurrentMonth = new Date(endYear, endMonth + 1, 0).getDate();
+  const daysWorkedInCurrentMonth = endOfAccrual.getDate();
+  const currentPartialMonth = daysWorkedInCurrentMonth / daysInCurrentMonth;
+
+  monthsWorked = monthsWorked + partialMonth + currentPartialMonth;
+  monthsWorked = Math.max(0, Math.min(12, monthsWorked)); // Cap at 12 months
 
   const entitlements = await calculateLeaveEntitlements(employee, year);
-  
+
   // Calculate monthly accrual rates
   const accrualRates = {
     VACATION: entitlements.VACATION / 12,
     SICK_LEAVE: entitlements.SICK_LEAVE / 12,
-    PERSONAL: entitlements.PERSONAL / 12
+    PERSONAL: entitlements.PERSONAL / 12,
+    STUDY_LEAVE: entitlements.STUDY_LEAVE / 12
   };
 
   const accrued = {};
   Object.keys(accrualRates).forEach(leaveType => {
-    accrued[leaveType] = Math.floor(accrualRates[leaveType] * monthsWorked);
+    if (accrualRates[leaveType] > 0) {
+      // Round to 1 decimal place for more accurate tracking
+      accrued[leaveType] = Math.round(accrualRates[leaveType] * monthsWorked * 10) / 10;
+    } else {
+      // For leave types with 0 entitlement, give full amount immediately
+      accrued[leaveType] = entitlements[leaveType];
+    }
   });
+
+  // Add non-accruing leave types (available immediately)
+  accrued.EMERGENCY = entitlements.EMERGENCY;
+  accrued.MATERNITY = entitlements.MATERNITY;
+  accrued.PATERNITY = entitlements.PATERNITY;
+  accrued.BEREAVEMENT = entitlements.BEREAVEMENT;
+  accrued.UNPAID_LEAVE = entitlements.UNPAID_LEAVE;
 
   return accrued;
 }
