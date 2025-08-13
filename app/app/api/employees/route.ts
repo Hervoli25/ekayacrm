@@ -64,6 +64,24 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Get real leave request data
+    const userIds = employees.map(emp => emp.userId);
+    const pendingLeaveRequests = await prisma.leaveRequest.findMany({
+      where: {
+        userId: { in: userIds },
+        status: 'PENDING'
+      },
+      select: {
+        userId: true
+      }
+    });
+
+    // Count pending leave requests per user
+    const pendingLeaveByUser = pendingLeaveRequests.reduce((acc, request) => {
+      acc[request.userId] = (acc[request.userId] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     // Transform data to include additional fields expected by frontend
     const transformedEmployees = employees.map(emp => ({
       id: emp.id,
@@ -79,7 +97,7 @@ export async function GET(request: NextRequest) {
       phone: emp.phone,
       lastLogin: emp.user?.lastLogin?.toISOString(),
       performanceScore: Math.random() * 2 + 3.0, // Mock data for now
-      pendingLeave: Math.floor(Math.random() * 3),
+      pendingLeave: pendingLeaveByUser[emp.userId] || 0, // Real leave request data
       clearanceLevel: 'NONE', // Would be fetched from EmployeeProfile in real implementation
       reportsTo: null // Would be fetched from EmployeeHierarchy in real implementation
     }));

@@ -77,11 +77,12 @@ export async function GET(request: NextRequest) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const approvedLeavesToday = await prisma.leaveRequest.count({
+    // Count employees currently on leave (approved leaves that are active today)
+    const employeesOnLeaveToday = await prisma.leaveRequest.count({
       where: {
         status: 'APPROVED',
         startDate: {
-          lte: tomorrow,
+          lte: today,
         },
         endDate: {
           gte: today,
@@ -202,7 +203,7 @@ export async function GET(request: NextRequest) {
       newHiresThisMonth,
       terminatedThisMonth,
       pendingLeaveRequests,
-      approvedLeavesToday,
+      employeesOnLeave: employeesOnLeaveToday,
       employeesByDepartment: employeesByDepartment.map(dept => ({
         department: dept.department,
         count: dept._count.department,
