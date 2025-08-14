@@ -82,6 +82,13 @@ export function AdvancedEmployeeManagement({ userRole, userDepartment }: Advance
   const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
   const [createSuccess, setCreateSuccess] = useState<any>(null);
 
+  // Dynamic data state
+  const [jobTitles, setJobTitles] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [managers, setManagers] = useState<any[]>([]);
+  const [isLoadingFormData, setIsLoadingFormData] = useState(false);
+
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -112,6 +119,49 @@ export function AdvancedEmployeeManagement({ userRole, userDepartment }: Advance
 
     fetchEmployees();
   }, [userRole, userDepartment]);
+
+  // Fetch dynamic form data
+  useEffect(() => {
+    const fetchFormData = async () => {
+      if (showCreateDialog) {
+        setIsLoadingFormData(true);
+        try {
+          const [jobTitlesRes, departmentsRes, rolesRes, managersRes] = await Promise.all([
+            fetch('/api/job-titles'),
+            fetch('/api/departments'),
+            fetch('/api/roles'),
+            fetch('/api/managers')
+          ]);
+
+          if (jobTitlesRes.ok) {
+            const jobTitlesData = await jobTitlesRes.json();
+            setJobTitles(jobTitlesData);
+          }
+
+          if (departmentsRes.ok) {
+            const departmentsData = await departmentsRes.json();
+            setDepartments(departmentsData);
+          }
+
+          if (rolesRes.ok) {
+            const rolesData = await rolesRes.json();
+            setRoles(rolesData.roles || []);
+          }
+
+          if (managersRes.ok) {
+            const managersData = await managersRes.json();
+            setManagers(managersData.managers || []);
+          }
+        } catch (error) {
+          console.error('Error fetching form data:', error);
+        } finally {
+          setIsLoadingFormData(false);
+        }
+      }
+    };
+
+    fetchFormData();
+  }, [showCreateDialog]);
 
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -695,13 +745,27 @@ export function AdvancedEmployeeManagement({ userRole, userDepartment }: Advance
 
               <div className="space-y-2">
                 <Label htmlFor="emp-title">Job Title *</Label>
-                <Input
-                  id="emp-title"
-                  placeholder="e.g., Senior Developer, HR Specialist"
+                <Select
                   value={employeeForm.title}
-                  onChange={(e) => setEmployeeForm({...employeeForm, title: e.target.value})}
-                  required
-                />
+                  onValueChange={(value) => setEmployeeForm({...employeeForm, title: value})}
+                  disabled={isLoadingFormData}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingFormData ? "Loading job titles..." : "Select job title"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTitles.map((jobTitle) => (
+                      <SelectItem key={`${jobTitle.title}-${jobTitle.department}`} value={jobTitle.title}>
+                        <div className="flex flex-col">
+                          <span>{jobTitle.title}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {jobTitle.department} • {jobTitle.level}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -717,36 +781,52 @@ export function AdvancedEmployeeManagement({ userRole, userDepartment }: Advance
               {/* Role and Department */}
               <div className="space-y-2">
                 <Label htmlFor="emp-role">Role *</Label>
-                <Select value={employeeForm.role} onValueChange={(value) => setEmployeeForm({...employeeForm, role: value})}>
+                <Select
+                  value={employeeForm.role}
+                  onValueChange={(value) => setEmployeeForm({...employeeForm, role: value})}
+                  disabled={isLoadingFormData}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select employee role" />
+                    <SelectValue placeholder={isLoadingFormData ? "Loading roles..." : "Select employee role"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="HR_MANAGER">HR Manager</SelectItem>
-                    <SelectItem value="DEPARTMENT_MANAGER">Department Manager</SelectItem>
-                    <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
-                    <SelectItem value="SENIOR_EMPLOYEE">Senior Employee</SelectItem>
-                    <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                    <SelectItem value="INTERN">Intern</SelectItem>
+                    {roles.map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        <div className="flex flex-col">
+                          <span>{role.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {role.description}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="emp-department">Department *</Label>
-                <Select value={employeeForm.department} onValueChange={(value) => setEmployeeForm({...employeeForm, department: value})}>
+                <Select
+                  value={employeeForm.department}
+                  onValueChange={(value) => setEmployeeForm({...employeeForm, department: value})}
+                  disabled={isLoadingFormData}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={isLoadingFormData ? "Loading departments..." : "Select department"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Executive">Executive</SelectItem>
-                    <SelectItem value="Human Resources">Human Resources</SelectItem>
-                    <SelectItem value="Finance">Finance</SelectItem>
-                    <SelectItem value="Operations">Operations</SelectItem>
-                    <SelectItem value="Trading">Trading</SelectItem>
-                    <SelectItem value="IT">IT</SelectItem>
-                    <SelectItem value="Risk Management">Risk Management</SelectItem>
-                    <SelectItem value="Compliance">Compliance</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.name}>
+                        <div className="flex flex-col">
+                          <span>{dept.name}</span>
+                          {dept.description && (
+                            <span className="text-xs text-muted-foreground">
+                              {dept.description}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -778,12 +858,33 @@ export function AdvancedEmployeeManagement({ userRole, userDepartment }: Advance
               {/* Reporting Structure */}
               <div className="space-y-2">
                 <Label htmlFor="emp-reports-to">Reports To</Label>
-                <Input
-                  id="emp-reports-to"
-                  placeholder="Manager's name"
+                <Select
                   value={employeeForm.reportsTo}
-                  onChange={(e) => setEmployeeForm({...employeeForm, reportsTo: e.target.value})}
-                />
+                  onValueChange={(value) => setEmployeeForm({...employeeForm, reportsTo: value})}
+                  disabled={isLoadingFormData}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingFormData ? "Loading managers..." : "Select manager/supervisor"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No direct manager</SelectItem>
+                    {managers.map((manager) => (
+                      <SelectItem key={manager.id} value={manager.id}>
+                        <div className="flex flex-col">
+                          <div className="flex items-center">
+                            <span className="font-medium">{manager.name}</span>
+                            <Badge variant="secondary" className="ml-2 text-xs">
+                              {manager.roleLabel}
+                            </Badge>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {manager.title} • {manager.department}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
     // Transform data to include additional fields expected by frontend
     const transformedEmployees = employees.map(emp => ({
       id: emp.id,
+      userId: emp.userId, // Include userId for performance APIs
       employeeId: emp.employeeId,
       name: emp.name,
       email: emp.email,

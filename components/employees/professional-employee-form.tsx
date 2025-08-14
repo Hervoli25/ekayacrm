@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,18 +33,19 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Building, 
-  Briefcase, 
+import {
+  User,
+  Mail,
+  Phone,
+  Building,
+  Briefcase,
   Calendar,
   DollarSign,
   MapPin,
   UserCheck,
   Save,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import { showSuccess, showError, showLoading } from '@/lib/sweetalert';
 import Swal from 'sweetalert2';
@@ -63,6 +64,7 @@ const employeeSchema = z.object({
   address: z.string().optional(),
   emergencyContact: z.string().optional(),
   emergencyPhone: z.string().optional(),
+  reportsTo: z.string().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE', 'ON_LEAVE', 'TERMINATED']).default('ACTIVE'),
 });
 
@@ -75,60 +77,56 @@ interface ProfessionalEmployeeFormProps {
   onSuccess?: () => void;
 }
 
-// Predefined options to prevent layout shifts
-const DEPARTMENTS = [
-  'Executive',
-  'Human Resources', 
-  'Finance',
-  'Trading',
-  'Risk Management',
-  'IT',
-  'Operations',
-  'Compliance'
-];
+// Types for dynamic data
+interface JobTitle {
+  title: string;
+  department: string;
+  level: string;
+  description?: string;
+}
 
-const ROLES = [
-  'DIRECTOR',
-  'HR_MANAGER',
-  'DEPARTMENT_MANAGER', 
-  'SUPERVISOR',
-  'SENIOR_EMPLOYEE',
-  'EMPLOYEE',
-  'INTERN'
-];
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+}
 
-const TITLES = [
-  'Chief Executive Officer',
-  'Chief Financial Officer',
-  'Chief Technology Officer',
-  'Director',
-  'HR Manager',
-  'Finance Manager',
-  'Trading Manager',
-  'Risk Manager',
-  'IT Manager',
-  'Operations Manager',
-  'Compliance Manager',
-  'Senior Trader',
-  'Senior Developer',
-  'Senior Analyst',
-  'Supervisor',
-  'Trader',
-  'Developer',
-  'Analyst',
-  'Specialist',
-  'Coordinator',
-  'Assistant',
-  'Intern'
-];
+interface Role {
+  value: string;
+  label: string;
+  description: string;
+  level: string;
+}
 
-export function ProfessionalEmployeeForm({ 
-  isOpen, 
-  onClose, 
-  employee, 
-  onSuccess 
+interface Manager {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  roleLabel: string;
+  department: string;
+  title: string;
+  employeeId: string;
+}
+
+export function ProfessionalEmployeeForm({
+  isOpen,
+  onClose,
+  employee,
+  onSuccess
 }: ProfessionalEmployeeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dynamic data state
+  const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [managers, setManagers] = useState<Manager[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // Selected department for filtering
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
 
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
@@ -145,10 +143,91 @@ export function ProfessionalEmployeeForm({
       address: employee?.address || '',
       emergencyContact: employee?.emergencyContact || '',
       emergencyPhone: employee?.emergencyPhone || '',
+      reportsTo: employee?.reportsTo || '',
       status: employee?.status || 'ACTIVE',
     },
     mode: 'onChange', // Validate on change for better UX
   });
+
+  // Fetch dynamic data
+  const fetchJobTitles = useCallback(async (department?: string) => {
+    try {
+      const url = department
+        ? `/api/job-titles?department=${encodeURIComponent(department)}`
+        : '/api/job-titles';
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setJobTitles(data);
+      }
+    } catch (error) {
+      console.error('Error fetching job titles:', error);
+    }
+  }, []);
+
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await fetch('/api/departments');
+      if (response.ok) {
+        const data = await response.json();
+        setDepartments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  }, []);
+
+  const fetchRoles = useCallback(async () => {
+    try {
+      const response = await fetch('/api/roles');
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data.roles || []);
+      }
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  }, []);
+
+  const fetchManagers = useCallback(async (department?: string) => {
+    try {
+      const url = department
+        ? `/api/managers?department=${encodeURIComponent(department)}`
+        : '/api/managers';
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setManagers(data.managers || []);
+      }
+    } catch (error) {
+      console.error('Error fetching managers:', error);
+    }
+  }, []);
+
+  // Load all dynamic data when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      const loadData = async () => {
+        setIsLoadingData(true);
+        await Promise.all([
+          fetchJobTitles(),
+          fetchDepartments(),
+          fetchRoles(),
+          fetchManagers()
+        ]);
+        setIsLoadingData(false);
+      };
+      loadData();
+    }
+  }, [isOpen, fetchJobTitles, fetchDepartments, fetchRoles, fetchManagers]);
+
+  // Update job titles and managers when department changes
+  useEffect(() => {
+    if (selectedDepartment) {
+      fetchJobTitles(selectedDepartment);
+      fetchManagers(selectedDepartment);
+    }
+  }, [selectedDepartment, fetchJobTitles, fetchManagers]);
 
   const onSubmit = useCallback(async (data: EmployeeFormData) => {
     setIsSubmitting(true);
@@ -340,20 +419,28 @@ export function ProfessionalEmployeeForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Job Title *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isLoadingData}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select job title" />
+                              <SelectValue placeholder={isLoadingData ? "Loading job titles..." : "Select job title"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {TITLES.map((title) => (
-                              <SelectItem key={title} value={title}>
-                                {title}
+                            {jobTitles.map((jobTitle) => (
+                              <SelectItem key={`${jobTitle.title}-${jobTitle.department}`} value={jobTitle.title}>
+                                <div className="flex flex-col">
+                                  <span>{jobTitle.title}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {jobTitle.department} • {jobTitle.level}
+                                  </span>
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormDescription>
+                          {selectedDepartment ? `Showing titles for ${selectedDepartment}` : 'Select a department to filter job titles'}
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -365,16 +452,30 @@ export function ProfessionalEmployeeForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Department *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedDepartment(value);
+                          }}
+                          defaultValue={field.value}
+                          disabled={isSubmitting || isLoadingData}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select department" />
+                              <SelectValue placeholder={isLoadingData ? "Loading departments..." : "Select department"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {DEPARTMENTS.map((dept) => (
-                              <SelectItem key={dept} value={dept}>
-                                {dept}
+                            {departments.map((dept) => (
+                              <SelectItem key={dept.id} value={dept.name}>
+                                <div className="flex flex-col">
+                                  <span>{dept.name}</span>
+                                  {dept.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {dept.description}
+                                    </span>
+                                  )}
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -392,19 +493,24 @@ export function ProfessionalEmployeeForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>System Role *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isLoadingData}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select system role" />
+                              <SelectValue placeholder={isLoadingData ? "Loading roles..." : "Select system role"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ROLES.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                <div className="flex items-center">
-                                  <Badge variant="outline" className="mr-2">
-                                    {role.replace('_', ' ')}
-                                  </Badge>
+                            {roles.map((role) => (
+                              <SelectItem key={role.value} value={role.value}>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center">
+                                    <Badge variant="outline" className="mr-2">
+                                      {role.label}
+                                    </Badge>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {role.description}
+                                  </span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -431,6 +537,47 @@ export function ProfessionalEmployeeForm({
                             disabled={isSubmitting}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="reportsTo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Reports To (Optional)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isLoadingData}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingData ? "Loading managers..." : "Select manager/supervisor"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">No direct manager</SelectItem>
+                            {managers.map((manager) => (
+                              <SelectItem key={manager.id} value={manager.id}>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center">
+                                    <span className="font-medium">{manager.name}</span>
+                                    <Badge variant="secondary" className="ml-2 text-xs">
+                                      {manager.roleLabel}
+                                    </Badge>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {manager.title} • {manager.department}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Select the direct manager or supervisor for this employee
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

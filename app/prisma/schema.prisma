@@ -144,6 +144,9 @@ model User {
   temporaryCredentials TemporaryCredential[] @relation("EmployeeCredentials")
   createdCredentials   TemporaryCredential[] @relation("CredentialCreator")
 
+  // Job Titles
+  createdJobTitles     JobTitle[]           @relation("JobTitleCreator")
+
   @@map("users")
 }
 
@@ -1371,5 +1374,33 @@ model TemporaryCredential {
   creator  User @relation("CredentialCreator", fields: [createdBy], references: [id])
 
   @@map("temporary_credentials")
+}
+
+// Job Titles Management
+model JobTitle {
+  id          String   @id @default(cuid())
+  title       String
+  department  String
+  level       JobLevel
+  description String?
+  isActive    Boolean  @default(true)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator User @relation("JobTitleCreator", fields: [createdBy], references: [id])
+
+  @@unique([title, department])
+  @@map("job_titles")
+}
+
+enum JobLevel {
+  ENTRY
+  JUNIOR
+  SENIOR
+  LEAD
+  MANAGER
+  DIRECTOR
+  EXECUTIVE
 }
 
