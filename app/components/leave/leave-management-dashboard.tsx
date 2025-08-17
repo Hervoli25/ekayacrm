@@ -418,6 +418,14 @@ export function LeaveManagementDashboard() {
           )}
         </DialogContent>
       </Dialog>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-6">
+          <div className="text-center py-8">
+            <p className="text-gray-500">Team Calendar view coming soon...</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
