@@ -33,7 +33,11 @@ import {
   Bell,
   HelpCircle,
   Key,
-  BookOpen
+  BookOpen,
+  Car,
+  Search,
+  Activity,
+  TrendingUp as TrendingUpIcon
 } from 'lucide-react';
 import { AnimatedBrand } from '@/components/ui/animated-brand';
 import Link from 'next/link';
@@ -88,6 +92,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           { name: 'Reports', href: '/finance/reports', icon: BarChart3, color: 'text-blue-600' },
           { name: 'Receipts', href: '/finance/receipts', icon: Receipt, color: 'text-gray-600' },
           { name: 'Payroll', href: '/payroll', icon: Briefcase, color: 'text-red-600' },
+        ] : [])
+      ]
+    },
+    {
+      title: 'CRM',
+      items: [
+        ...((['ADMIN', 'SUPER_ADMIN', 'DIRECTOR', 'HR_MANAGER'].includes(session?.user?.role || '')) ? [
+          { name: 'CRM Dashboard', href: '/crm', icon: Car, color: 'text-blue-600' },
+          { name: 'Search Bookings', href: '/crm/search', icon: Search, color: 'text-green-600' },
+          { name: 'Capacity Monitor', href: '/crm/capacity', icon: Activity, color: 'text-purple-600' },
+          { name: 'Customer Tools', href: '/crm/customers', icon: Users, color: 'text-indigo-600' },
+          { name: 'Analytics', href: '/crm/analytics', icon: TrendingUpIcon, color: 'text-orange-600' },
         ] : [])
       ]
     },

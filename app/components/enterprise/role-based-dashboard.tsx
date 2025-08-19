@@ -65,6 +65,7 @@ import {
   WifiOff
 } from 'lucide-react';
 import { Role } from '@prisma/client';
+import { CRMDashboardWidget } from '@/components/crm/dashboard-widget';
 
 interface DashboardProps {
   userRole: Role;
@@ -562,6 +563,11 @@ export function RoleBasedDashboard({ userRole, userName, departmentName }: Dashb
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* CRM Integration */}
+          <div className="mt-6">
+            <CRMDashboardWidget />
           </div>
         </TabsContent>
 
