@@ -67,3 +67,12 @@ Thumbs.db
 
 # Misc
 *.nfs*
+
+# Markdown files (may contain sensitive information)
+*.md
+**/*.md
+!README.md
+
+# Temporary files
+**/nul
+app/nul
