@@ -49,7 +49,6 @@ export function AnalyticsDashboard() {
       setLoading(true);
       const response = await fetch(`/api/crm/analytics?period=${selectedPeriod}`, {
         headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
           'Content-Type': 'application/json',
         },
       });

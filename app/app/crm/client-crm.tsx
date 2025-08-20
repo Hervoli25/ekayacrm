@@ -11,7 +11,7 @@ import { CapacityMonitor } from '@/components/crm/capacity-monitor';
 import { CustomerTools } from '@/components/crm/customer-tools';
 import { AnalyticsDashboard } from '@/components/crm/analytics-dashboard';
 import { BookingDiagnostic } from '@/components/crm/booking-diagnostic';
-import { PromotionManagement } from '@/components/crm/promotion-management';
+import { PromotionManagement } from '@/components/crm/promotion-management-fixed';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Car, Search, Calendar, Users, BarChart3, Activity, Stethoscope, Tag } from 'lucide-react';
 

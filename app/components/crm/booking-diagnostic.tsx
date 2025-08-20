@@ -81,7 +81,7 @@ export function BookingDiagnostic() {
     try {
       const response = await fetch('/api/crm/bookings/diagnostic', {
         headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024'
+          'Content-Type': 'application/json'
         }
       });
 
@@ -105,7 +105,6 @@ export function BookingDiagnostic() {
       const response = await fetch('/api/crm/bookings/diagnostic', {
         method: 'POST',
         headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

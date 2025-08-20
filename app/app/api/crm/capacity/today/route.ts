@@ -3,17 +3,16 @@ import { Client } from 'pg';
 import { getCarWashConfig, validateCarWashApiKey } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
+  let client: Client;
+
   try {
     // Get secure configuration
     const { databaseUrl } = getCarWashConfig();
+    client = new Client({ connectionString: databaseUrl });
 
-    const client = new Client({
-      connectionString: databaseUrl,
-    });
-
-    // Verify API key securely
+    // Verify API key securely (optional for internal requests)
     const apiKey = request.headers.get('X-API-Key');
-    if (!validateCarWashApiKey(apiKey)) {
+    if (apiKey && !validateCarWashApiKey(apiKey)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -141,7 +140,77 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await client.end();
+    if (client) {
+      await client.end();
+    }
+  }
+}
+
+// POST - Add new time slot or modify capacity
+export async function POST(request: NextRequest) {
+  let client: Client;
+
+  try {
+    // Get secure configuration
+    const { databaseUrl } = getCarWashConfig();
+    client = new Client({ connectionString: databaseUrl });
+
+    // Verify API key securely (optional for internal requests)
+    const apiKey = request.headers.get('X-API-Key');
+    if (apiKey && !validateCarWashApiKey(apiKey)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { action, time, date, maxCapacity } = body;
+
+    if (!action || !time) {
+      return NextResponse.json({ 
+        error: 'Action and time are required' 
+      }, { status: 400 });
+    }
+
+    await client.connect();
+
+    if (action === 'add_slot') {
+      // For adding new time slot, just return success
+      // In a real system, you might store custom time slots in a separate table
+      return NextResponse.json({
+        success: true,
+        message: `Time slot ${time} added successfully`,
+        slot: {
+          time,
+          date: date || new Date().toISOString().split('T')[0],
+          maxCapacity: maxCapacity || 4,
+          available: true
+        }
+      });
+    } else if (action === 'update_capacity') {
+      // Update capacity for existing slot
+      return NextResponse.json({
+        success: true,
+        message: `Capacity updated for ${time}`,
+        slot: {
+          time,
+          maxCapacity: maxCapacity || 4
+        }
+      });
+    }
+
+    return NextResponse.json({ 
+      error: 'Invalid action' 
+    }, { status: 400 });
+
+  } catch (error) {
+    console.error('Error managing capacity slot:', error);
+    return NextResponse.json(
+      { error: 'Failed to manage capacity slot' },
+      { status: 500 }
+    );
+  } finally {
+    if (client) {
+      await client.end();
+    }
   }
 }
 

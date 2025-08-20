@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCRMBookings } from '@/hooks/use-crm-data';
+import { PaymentConfirmation } from './payment-confirmation';
 import Swal from 'sweetalert2';
 import { 
   Calendar,
@@ -23,7 +24,9 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  CreditCard,
+  Receipt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,6 +53,7 @@ export function BookingManagement() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState<Booking | null>(null);
   
   // Use the CRM bookings hook with status filtering
   const { bookings, loading, error, refetch } = useCRMBookings(statusFilter);
@@ -174,46 +178,48 @@ export function BookingManagement() {
   };
 
   return (
-    <>
-      <style jsx global>{`
-        .swal2-popup-custom {
-          z-index: 10000 !important;
-        }
-        .swal2-actions-custom {
-          display: flex !important;
-          gap: 10px !important;
-          justify-content: center !important;
-          margin-top: 20px !important;
-        }
-        .swal2-confirm-custom,
-        .swal2-cancel-custom {
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          padding: 8px 16px !important;
-          border-radius: 6px !important;
-          font-weight: 500 !important;
-          font-size: 14px !important;
-          border: none !important;
-          cursor: pointer !important;
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        .swal2-confirm-custom {
-          background-color: #3b82f6 !important;
-          color: white !important;
-        }
-        .swal2-cancel-custom {
-          background-color: #6b7280 !important;
-          color: white !important;
-        }
-        .swal2-confirm-custom:hover {
-          background-color: #2563eb !important;
-        }
-        .swal2-cancel-custom:hover {
-          background-color: #4b5563 !important;
-        }
-      `}</style>
+    <div>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .swal2-popup-custom {
+            z-index: 10000 !important;
+          }
+          .swal2-actions-custom {
+            display: flex !important;
+            gap: 10px !important;
+            justify-content: center !important;
+            margin-top: 20px !important;
+          }
+          .swal2-confirm-custom,
+          .swal2-cancel-custom {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            border: none !important;
+            cursor: pointer !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+          .swal2-confirm-custom {
+            background-color: #3b82f6 !important;
+            color: white !important;
+          }
+          .swal2-cancel-custom {
+            background-color: #6b7280 !important;
+            color: white !important;
+          }
+          .swal2-confirm-custom:hover {
+            background-color: #2563eb !important;
+          }
+          .swal2-cancel-custom:hover {
+            background-color: #4b5563 !important;
+          }
+        `
+      }} />
       <Card className="w-full">
         <CardHeader>
         <div className="flex items-center justify-between">
@@ -439,6 +445,29 @@ export function BookingManagement() {
                     <Phone className="h-3 w-3 mr-1" />
                     Call
                   </Button>
+
+                  {(booking.status === 'completed' || booking.status === 'in_progress') && 
+                   booking.paymentStatus !== 'paid' && (
+                    <Button 
+                      size="sm" 
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => setShowPaymentConfirmation(booking)}
+                    >
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Confirm Payment
+                    </Button>
+                  )}
+
+                  {booking.paymentStatus === 'paid' && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-green-200 text-green-700 hover:bg-green-50"
+                    >
+                      <Receipt className="h-3 w-3 mr-1" />
+                      View Receipt
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -458,7 +487,46 @@ export function BookingManagement() {
           </div>
         )}
       </CardContent>
+
+      {/* Payment Confirmation Dialog */}
+      {showPaymentConfirmation && (
+        <Dialog open={!!showPaymentConfirmation} onOpenChange={() => setShowPaymentConfirmation(null)}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Payment Confirmation</DialogTitle>
+            </DialogHeader>
+            <PaymentConfirmation
+              booking={{
+                id: showPaymentConfirmation.id,
+                customerName: showPaymentConfirmation.customerName,
+                customerEmail: showPaymentConfirmation.customerEmail,
+                customerPhone: showPaymentConfirmation.customerPhone,
+                serviceName: showPaymentConfirmation.serviceName,
+                vehicleInfo: showPaymentConfirmation.licensePlate,
+                scheduledDate: showPaymentConfirmation.scheduledDate,
+                scheduledTime: showPaymentConfirmation.scheduledTime,
+                totalAmount: showPaymentConfirmation.totalAmount,
+                status: showPaymentConfirmation.status
+              }}
+              onPaymentConfirmed={(paymentData) => {
+                // Refresh bookings and close dialog
+                refetch();
+                setShowPaymentConfirmation(null);
+                
+                // Show success message
+                Swal.fire({
+                  title: '✅ Payment Confirmed!',
+                  text: `Payment of R${paymentData.payment.amount} has been recorded successfully.`,
+                  icon: 'success',
+                  timer: 3000
+                });
+              }}
+              onClose={() => setShowPaymentConfirmation(null)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
-    </>
+    </div>
   );
 }

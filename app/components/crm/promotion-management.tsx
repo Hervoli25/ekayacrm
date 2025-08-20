@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
+// API key is now handled securely on the server side
 
 interface Promotion {
   id: string;
@@ -113,7 +113,6 @@ export function PromotionManagement() {
 
       const response = await fetch(`/api/crm/promotions?${params.toString()}`, {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -147,7 +146,6 @@ export function PromotionManagement() {
 
       const response = await fetch(`/api/crm/users?${params.toString()}`, {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -201,9 +199,6 @@ export function PromotionManagement() {
 
       const response = await fetch('/api/crm/promotions/upload', {
         method: 'POST',
-        headers: {
-          'X-API-Key': API_KEY,
-        },
         body: formData,
       });
 
@@ -258,7 +253,6 @@ export function PromotionManagement() {
       const response = await fetch('/api/crm/promotions', {
         method: 'POST',
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(promotionData),
@@ -372,7 +366,6 @@ export function PromotionManagement() {
       const response = await fetch('/api/crm/promotions/send', {
         method: 'POST',
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

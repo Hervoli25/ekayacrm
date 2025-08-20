@@ -1,9 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   Activity,
   Clock,
@@ -12,10 +16,13 @@ import {
   AlertCircle,
   CheckCircle,
   Zap,
-  Calendar
+  Calendar,
+  Plus,
+  Settings
 } from 'lucide-react';
 import { useCRMCapacity } from '@/hooks/use-crm-data';
 import { cn } from '@/lib/utils';
+import Swal from 'sweetalert2';
 
 interface TimeSlot {
   time: string;
@@ -27,7 +34,8 @@ interface TimeSlot {
 }
 
 export function CapacityMonitor() {
-  const { capacity, loading, error } = useCRMCapacity();
+  const { capacity, loading, error, refetch } = useCRMCapacity();
+  const [isAddingSlot, setIsAddingSlot] = useState(false);
 
   // Use real capacity data from API, fallback to empty array if loading
   const displayCapacity = loading ? [] : (capacity?.slots || []);
@@ -78,6 +86,96 @@ export function CapacityMonitor() {
   };
 
   const stats = getTotalStats();
+
+  const handleManageBookings = () => {
+    Swal.fire({
+      title: 'Manage Bookings',
+      text: 'This would navigate to the booking management page with today\'s bookings.',
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Go to Bookings',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Navigate to booking management - in a real app you'd use router
+        window.location.href = '/crm/bookings';
+      }
+    });
+  };
+
+  const handleAddTimeSlot = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: 'Add Time Slot',
+      html: `
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+            <input id="time-input" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="09:00">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Max Capacity</label>
+            <input id="capacity-input" type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="4" min="1" max="10">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input id="date-input" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="${new Date().toISOString().split('T')[0]}">
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Add Slot',
+      cancelButtonText: 'Cancel',
+      preConfirm: () => {
+        const time = (document.getElementById('time-input') as HTMLInputElement)?.value;
+        const capacity = parseInt((document.getElementById('capacity-input') as HTMLInputElement)?.value || '4');
+        const date = (document.getElementById('date-input') as HTMLInputElement)?.value;
+        
+        if (!time) {
+          Swal.showValidationMessage('Please enter a time');
+          return false;
+        }
+        
+        return { time, capacity, date };
+      }
+    });
+
+    if (formValues) {
+      try {
+        const response = await fetch('/api/crm/capacity/today', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'add_slot',
+            time: formValues.time,
+            maxCapacity: formValues.capacity,
+            date: formValues.date
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          Swal.fire({
+            title: 'Success!',
+            text: result.message,
+            icon: 'success'
+          });
+          refetch(); // Refresh the capacity data
+        } else {
+          throw new Error(result.error || 'Failed to add time slot');
+        }
+      } catch (error) {
+        Swal.fire({
+          title: 'Error',
+          text: error instanceof Error ? error.message : 'Failed to add time slot',
+          icon: 'error'
+        });
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -264,12 +362,24 @@ export function CapacityMonitor() {
         {/* Quick Actions */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="grid grid-cols-2 gap-2">
-            <button className="text-xs bg-blue-50 text-blue-600 px-3 py-2 rounded-md hover:bg-blue-100 transition-colors duration-200">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleManageBookings}
+              className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100"
+            >
+              <Settings className="h-3 w-3 mr-1" />
               Manage Bookings
-            </button>
-            <button className="text-xs bg-green-50 text-green-600 px-3 py-2 rounded-md hover:bg-green-100 transition-colors duration-200">
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleAddTimeSlot}
+              className="text-xs bg-green-50 text-green-600 hover:bg-green-100"
+            >
+              <Plus className="h-3 w-3 mr-1" />
               Add Time Slot
-            </button>
+            </Button>
           </div>
         </div>
       </CardContent>

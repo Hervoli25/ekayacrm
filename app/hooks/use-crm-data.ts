@@ -90,7 +90,6 @@ export function useCRMSearch() {
       setLoading(true);
       const response = await fetch(`/api/crm/bookings/search?q=${encodeURIComponent(query)}`, {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -132,7 +131,6 @@ export function useCRMBookings(status?: string) {
 
       const response = await fetch(`/api/crm/bookings?${params.toString()}`, {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -171,7 +169,6 @@ export function useCRMBooking(bookingId: string | null) {
       setLoading(true);
       const response = await fetch(`/api/crm/bookings/${id}`, {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -210,7 +207,6 @@ export function useCRMCapacity() {
       setLoading(true);
       const response = await fetch('/api/crm/capacity/today', {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });

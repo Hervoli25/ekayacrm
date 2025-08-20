@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { validateCarWashApiKey } from '@/lib/config';
 
 const prisma = new PrismaClient();
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verify API key
+    // Verify API key securely
     const apiKey = request.headers.get('X-API-Key');
-    if (apiKey !== API_KEY) {
+    if (!validateCarWashApiKey(apiKey)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

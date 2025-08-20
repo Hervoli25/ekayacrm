@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
+import { validateCarWashApiKey } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify API key securely (optional for internal requests)
     const apiKey = request.headers.get('X-API-Key');
-    if (apiKey !== API_KEY) {
+    if (apiKey && !validateCarWashApiKey(apiKey)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

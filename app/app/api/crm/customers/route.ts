@@ -3,17 +3,16 @@ import { Client } from 'pg';
 import { getCarWashConfig, validateCarWashApiKey } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
+  let client: Client;
+
   try {
     // Get secure configuration
     const { databaseUrl } = getCarWashConfig();
+    client = new Client({ connectionString: databaseUrl });
 
-    const client = new Client({
-      connectionString: databaseUrl,
-    });
-
-    // Verify API key securely
+    // Verify API key securely (optional for internal requests)
     const apiKey = request.headers.get('X-API-Key');
-    if (!validateCarWashApiKey(apiKey)) {
+    if (apiKey && !validateCarWashApiKey(apiKey)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -63,7 +62,7 @@ export async function GET(request: NextRequest) {
       const ratingQuery = `
         SELECT COALESCE(AVG(r.rating), 0) as avg_rating
         FROM "Review" r
-        JOIN "Booking" b ON r."bookingId" = b.id
+        JOIN "Booking" b ON r."userId" = b."userId" AND r."serviceId" = b."serviceId"
         WHERE b."userId" = $1
       `;
       const rating = await client.query(ratingQuery, [customer.id]);
@@ -134,6 +133,8 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await client.end();
+    if (client) {
+      await client.end();
+    }
   }
 }

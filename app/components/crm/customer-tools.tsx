@@ -60,7 +60,6 @@ export function CustomerTools() {
       setLoading(true);
       const response = await fetch(`/api/crm/customers?search=${encodeURIComponent(searchQuery)}&tier=${filterTier}`, {
         headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
           'Content-Type': 'application/json',
         },
       });
@@ -163,7 +162,6 @@ export function CustomerTools() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
         },
         body: JSON.stringify({
           messageType,
@@ -267,7 +265,6 @@ export function CustomerTools() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
         },
         body: JSON.stringify(formValues),
       });
@@ -382,7 +379,6 @@ export function CustomerTools() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
         },
         body: JSON.stringify({
           messageType: 'promotional',
