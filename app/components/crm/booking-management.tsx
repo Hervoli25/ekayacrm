@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCRMSearch } from '@/hooks/use-crm-data';
+import { getCRMApiHeaders } from '@/lib/crm-config';
 import { 
   Calendar,
   Clock,
@@ -109,10 +110,7 @@ export function BookingManagement() {
     try {
       const response = await fetch(`/api/crm/bookings/${bookingId}/status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
-        },
+        headers: getCRMApiHeaders(),
         body: JSON.stringify({ status: newStatus }),
       });
 

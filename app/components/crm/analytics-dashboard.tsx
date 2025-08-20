@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { getCRMApiHeaders } from '@/lib/crm-config';
 import { 
   TrendingUp,
   TrendingDown,
@@ -48,10 +49,7 @@ export function AnalyticsDashboard() {
     try {
       setLoading(true);
       const response = await fetch(`/api/crm/analytics?period=${selectedPeriod}`, {
-        headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {

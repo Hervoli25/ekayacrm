@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
+import { getCRMApiHeaders } from '@/lib/crm-config';
 
 interface CRMStats {
   todayBookings: number;
@@ -48,10 +47,7 @@ export function useCRMStats() {
     try {
       setLoading(true);
       const response = await fetch('/api/crm/dashboard/stats', {
-        headers: {
-          'X-API-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {
@@ -94,10 +90,7 @@ export function useCRMSearch() {
     try {
       setLoading(true);
       const response = await fetch(`/api/crm/bookings/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          'X-API-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {
@@ -128,10 +121,7 @@ export function useCRMBooking(bookingId: string | null) {
     try {
       setLoading(true);
       const response = await fetch(`/api/crm/bookings/${id}`, {
-        headers: {
-          'X-API-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {
@@ -167,10 +157,7 @@ export function useCRMCapacity() {
     try {
       setLoading(true);
       const response = await fetch('/api/crm/capacity/today', {
-        headers: {
-          'X-API-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {
