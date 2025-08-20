@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
-
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
-const CAR_WASH_DB_URL = 'postgresql://neondb_owner:npg_Ku1tsfTV4qze@ep-odd-feather-ab7njs2z-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require';
+import { getCRMApiKey, getCRMDatabaseUrl } from '@/lib/env';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const client = new Client({
-    connectionString: CAR_WASH_DB_URL,
+    connectionString: getCRMDatabaseUrl(),
   });
 
   try {
     // Verify API key
     const apiKey = request.headers.get('X-API-Key');
-    if (apiKey !== API_KEY) {
+    if (apiKey !== getCRMApiKey()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

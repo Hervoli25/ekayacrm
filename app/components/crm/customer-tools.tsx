@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getCRMApiHeaders } from '@/lib/crm-config';
 import { 
   Users,
   User,
@@ -58,10 +59,7 @@ export function CustomerTools() {
     try {
       setLoading(true);
       const response = await fetch(`/api/crm/customers?search=${encodeURIComponent(searchQuery)}&tier=${filterTier}`, {
-        headers: {
-          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
-          'Content-Type': 'application/json',
-        },
+        headers: getCRMApiHeaders(),
       });
 
       if (!response.ok) {

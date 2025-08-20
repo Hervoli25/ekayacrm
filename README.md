@@ -107,12 +107,21 @@ A comprehensive, enterprise-grade HR and CRM management platform built with cutt
 
 ## 👥 Default Admin Credentials
 
-After seeding the database, you can log in with these super admin credentials:
+After seeding the database, you can log in with the default super admin credentials. 
+
+⚠️ **IMPORTANT SECURITY NOTE**: Change these default credentials immediately after first login:
 
 - **Email**: admin@ekhayaintel.com
-- **Password**: EkhayaIntelAdmin2024!
+- **Password**: `[Change this in production - see .env.example]`
 
 The system also includes 3 additional director accounts with super admin privileges.
+
+🔒 **Security Best Practices**:
+- Change all default passwords immediately after setup
+- Use strong, unique passwords for all admin accounts
+- Enable two-factor authentication if available
+- Regularly rotate admin credentials
+- Monitor admin account activity
 
 ## 🏗 Project Structure
 
