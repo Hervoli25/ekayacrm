@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Swal from 'sweetalert2';
 import { 
   Users,
   User,
@@ -37,7 +38,7 @@ interface Customer {
   totalSpent: number;
   averageRating: number;
   lastVisit: string;
-  loyaltyTier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  loyaltyTier: 'basic' | 'premium';
   status: 'active' | 'inactive' | 'vip';
   preferredServices: string[];
   vehicles: string[];
@@ -88,13 +89,9 @@ export function CustomerTools() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'bronze':
-        return 'bg-amber-100 text-amber-800';
-      case 'silver':
-        return 'bg-gray-100 text-gray-800';
-      case 'gold':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'platinum':
+      case 'basic':
+        return 'bg-blue-100 text-blue-800';
+      case 'premium':
         return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -123,9 +120,299 @@ export function CustomerTools() {
   };
 
   const sendMessage = async () => {
-    // Simulate sending message
-    console.log('Sending message:', { messageText, messageType, recipients: selectedCustomer ? [selectedCustomer] : filteredCustomers });
-    setMessageText('');
+    if (!messageText.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Message Required',
+        text: 'Please enter a message before sending.',
+        confirmButtonColor: '#3b82f6'
+      });
+      return;
+    }
+
+    const customerIds = selectedCustomer ? [selectedCustomer.id] : filteredCustomers.map(c => c.id);
+    
+    // Show confirmation dialog
+    const result = await Swal.fire({
+      title: 'Send Message',
+      text: `Send this message to ${customerIds.length} customer(s)?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Send Message',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) return;
+
+    // Show loading
+    Swal.fire({
+      title: 'Sending Message...',
+      text: 'Please wait while we send your message.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response = await fetch('/api/crm/customers/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
+        },
+        body: JSON.stringify({
+          messageType,
+          messageText,
+          customerIds
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const apiResult = await response.json();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Message Sent!',
+        text: `Message sent successfully to ${apiResult.sentCount} customers!`,
+        confirmButtonColor: '#10b981'
+      });
+      
+      setMessageText('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to Send',
+        text: 'Failed to send message. Please try again.',
+        confirmButtonColor: '#ef4444'
+      });
+    }
+  };
+
+  const addCustomer = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: 'Add New Customer',
+      html: `
+        <div style="text-align: left;">
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">First Name *</label>
+            <input id="firstName" class="swal2-input" placeholder="Enter first name" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Last Name *</label>
+            <input id="lastName" class="swal2-input" placeholder="Enter last name" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email *</label>
+            <input id="email" type="email" class="swal2-input" placeholder="Enter email address" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Phone</label>
+            <input id="phone" class="swal2-input" placeholder="Enter phone number (optional)" style="margin: 0; width: 100%;">
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Add Customer',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      preConfirm: () => {
+        const firstName = (document.getElementById('firstName') as HTMLInputElement).value;
+        const lastName = (document.getElementById('lastName') as HTMLInputElement).value;
+        const email = (document.getElementById('email') as HTMLInputElement).value;
+        const phone = (document.getElementById('phone') as HTMLInputElement).value;
+
+        if (!firstName || !lastName || !email) {
+          Swal.showValidationMessage('Please fill in all required fields (First Name, Last Name, Email)');
+          return false;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          Swal.showValidationMessage('Please enter a valid email address');
+          return false;
+        }
+
+        return { firstName, lastName, email, phone };
+      }
+    });
+
+    if (!formValues) return;
+
+    // Show loading
+    Swal.fire({
+      title: 'Adding Customer...',
+      text: 'Please wait while we add the new customer.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response = await fetch('/api/crm/customers/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
+        },
+        body: JSON.stringify(formValues),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add customer');
+      }
+
+      const result = await response.json();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Customer Added!',
+        text: `${formValues.firstName} ${formValues.lastName} has been added successfully.`,
+        confirmButtonColor: '#10b981'
+      });
+      
+      fetchCustomers(); // Refresh the customer list
+      return result.customer;
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to Add Customer',
+        text: error.message,
+        confirmButtonColor: '#ef4444'
+      });
+      throw error;
+    }
+  };
+
+  const createPromotion = async () => {
+    const { value: promoData } = await Swal.fire({
+      title: 'Create Promotion',
+      html: `
+        <div style="text-align: left;">
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Promotion Title *</label>
+            <input id="promoTitle" class="swal2-input" placeholder="e.g., 20% Off Premium Wash" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Discount Percentage *</label>
+            <input id="promoDiscount" type="number" class="swal2-input" placeholder="e.g., 20" min="5" max="50" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Valid Until *</label>
+            <input id="promoExpiry" type="date" class="swal2-input" style="margin: 0; width: 100%;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Promotion Message</label>
+            <textarea id="promoMessage" class="swal2-textarea" placeholder="Special promotion message for customers..." style="margin: 0; width: 100%; min-height: 80px;"></textarea>
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Create & Send',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      preConfirm: () => {
+        const title = (document.getElementById('promoTitle') as HTMLInputElement).value;
+        const discount = (document.getElementById('promoDiscount') as HTMLInputElement).value;
+        const expiry = (document.getElementById('promoExpiry') as HTMLInputElement).value;
+        const message = (document.getElementById('promoMessage') as HTMLTextAreaElement).value;
+
+        if (!title || !discount || !expiry) {
+          Swal.showValidationMessage('Please fill in all required fields');
+          return false;
+        }
+
+        const discountNum = parseInt(discount);
+        if (discountNum < 5 || discountNum > 50) {
+          Swal.showValidationMessage('Discount must be between 5% and 50%');
+          return false;
+        }
+
+        const expiryDate = new Date(expiry);
+        const today = new Date();
+        if (expiryDate <= today) {
+          Swal.showValidationMessage('Expiry date must be in the future');
+          return false;
+        }
+
+        return { title, discount: discountNum, expiry, message };
+      }
+    });
+
+    if (!promoData) return;
+
+    // Create promotional message
+    const promoMessage = promoData.message || 
+      `🎉 Special Offer: ${promoData.title}! Get ${promoData.discount}% off your next service. Valid until ${new Date(promoData.expiry).toLocaleDateString()}. Book now!`;
+
+    // Send as promotional message to all customers
+    const customerIds = filteredCustomers.map(c => c.id);
+    
+    Swal.fire({
+      title: 'Sending Promotion...',
+      text: `Sending promotion to ${customerIds.length} customers...`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response = await fetch('/api/crm/customers/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'ekhaya-car-wash-secret-key-2024',
+        },
+        body: JSON.stringify({
+          messageType: 'promotional',
+          messageText: promoMessage,
+          customerIds
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send promotion');
+      }
+
+      const result = await response.json();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Promotion Sent!',
+        text: `${promoData.title} sent successfully to ${result.sentCount} customers!`,
+        confirmButtonColor: '#10b981'
+      });
+      
+    } catch (error) {
+      console.error('Error sending promotion:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to Send Promotion',
+        text: 'Failed to send promotion. Please try again.',
+        confirmButtonColor: '#ef4444'
+      });
+    }
   };
 
   return (
@@ -153,10 +440,8 @@ export function CustomerTools() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tiers</SelectItem>
-              <SelectItem value="bronze">Bronze</SelectItem>
-              <SelectItem value="silver">Silver</SelectItem>
-              <SelectItem value="gold">Gold</SelectItem>
-              <SelectItem value="platinum">Platinum</SelectItem>
+              <SelectItem value="basic">Basic</SelectItem>
+              <SelectItem value="premium">Premium</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -233,12 +518,12 @@ export function CustomerTools() {
             </DialogContent>
           </Dialog>
           
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={createPromotion}>
             <Gift className="h-4 w-4 mr-1" />
             Create Promotion
           </Button>
           
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={addCustomer}>
             <UserPlus className="h-4 w-4 mr-1" />
             Add Customer
           </Button>

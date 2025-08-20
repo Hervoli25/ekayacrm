@@ -7,8 +7,9 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Create main admin user with your credentials
-  const adminPassword = await bcrypt.hash('EkhayaAdmin2024!#$', 12);
+  // Create main admin user with secure password from environment
+  const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'ChangeMe123!';
+  const adminPassword = await bcrypt.hash(defaultPassword, 12);
   const admin = await prisma.user.upsert({
     where: { email: 'admin' },
     update: {},

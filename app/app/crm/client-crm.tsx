@@ -10,8 +10,10 @@ import { BookingManagement } from '@/components/crm/booking-management';
 import { CapacityMonitor } from '@/components/crm/capacity-monitor';
 import { CustomerTools } from '@/components/crm/customer-tools';
 import { AnalyticsDashboard } from '@/components/crm/analytics-dashboard';
+import { BookingDiagnostic } from '@/components/crm/booking-diagnostic';
+import { PromotionManagement } from '@/components/crm/promotion-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Car, Search, Calendar, Users, BarChart3, Activity } from 'lucide-react';
+import { Car, Search, Calendar, Users, BarChart3, Activity, Stethoscope, Tag } from 'lucide-react';
 
 export default function ClientCRMPage() {
   const { data: session, status } = useSession();
@@ -74,7 +76,7 @@ export default function ClientCRMPage() {
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6 h-12 p-1 bg-gray-100 rounded-xl">
+              <TabsList className="grid w-full grid-cols-8 h-12 p-1 bg-gray-100 rounded-xl">
                 <TabsTrigger value="overview" className="rounded-lg font-semibold flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   <span className="hidden sm:inline">Overview</span>
@@ -98,6 +100,14 @@ export default function ClientCRMPage() {
                 <TabsTrigger value="analytics" className="rounded-lg font-semibold flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+                <TabsTrigger value="promotions" className="rounded-lg font-semibold flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  <span className="hidden sm:inline">Promotions</span>
+                </TabsTrigger>
+                <TabsTrigger value="diagnostic" className="rounded-lg font-semibold flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4" />
+                  <span className="hidden sm:inline">Diagnostic</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -127,6 +137,14 @@ export default function ClientCRMPage() {
 
               <TabsContent value="analytics">
                 <AnalyticsDashboard />
+              </TabsContent>
+
+              <TabsContent value="promotions">
+                <PromotionManagement />
+              </TabsContent>
+
+              <TabsContent value="diagnostic">
+                <BookingDiagnostic />
               </TabsContent>
             </Tabs>
           </div>

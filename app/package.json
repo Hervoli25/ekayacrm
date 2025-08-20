@@ -13,7 +13,9 @@
     "db:enterprise-seed": "npx tsx scripts/enterprise-seed.ts",
     "db:clean-seed": "npx tsx scripts/clean-seed.ts",
     "db:reset": "npx prisma db push --force-reset && npm run db:clean-seed",
-    "db:migrate-roles": "npx tsx scripts/migrate-roles.ts"
+    "db:migrate-roles": "npx tsx scripts/migrate-roles.ts",
+    "booking:diagnostic": "npx tsx scripts/booking-status-diagnostic.ts",
+    "booking:fix": "npx tsx scripts/booking-status-diagnostic.ts -- --fix"
   },
   "devDependencies": {
     "@next/swc-wasm-nodejs": "13.5.1",

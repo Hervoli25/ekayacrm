@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
-const API_KEY = 'ekhaya-car-wash-secret-key-2024';
+// API key is now handled securely on the server side
+// Client-side code no longer needs to know the API key
 
 interface CRMStats {
   todayBookings: number;
@@ -49,7 +50,6 @@ export function useCRMStats() {
       setLoading(true);
       const response = await fetch('/api/crm/dashboard/stats', {
         headers: {
-          'X-API-Key': API_KEY,
           'Content-Type': 'application/json',
         },
       });
@@ -86,11 +86,6 @@ export function useCRMSearch() {
   const [error, setError] = useState<string | null>(null);
 
   const search = async (query: string) => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await fetch(`/api/crm/bookings/search?q=${encodeURIComponent(query)}`, {
@@ -117,6 +112,53 @@ export function useCRMSearch() {
   };
 
   return { results, loading, error, search };
+}
+
+export function useCRMBookings(status?: string) {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({ total: 0, hasMore: false });
+
+  const fetchBookings = async (statusFilter?: string, offset = 0) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (statusFilter && statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
+      params.append('limit', '100');
+      params.append('offset', offset.toString());
+
+      const response = await fetch(`/api/crm/bookings?${params.toString()}`, {
+        headers: {
+          'X-API-Key': API_KEY,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch bookings: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setBookings(data.bookings || []);
+      setPagination(data.pagination || { total: 0, hasMore: false });
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch bookings');
+      console.error('Error fetching bookings:', err);
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings(status);
+  }, [status]);
+
+  return { bookings, loading, error, pagination, refetch: () => fetchBookings(status) };
 }
 
 export function useCRMBooking(bookingId: string | null) {

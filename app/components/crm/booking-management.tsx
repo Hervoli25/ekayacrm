@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useCRMSearch } from '@/hooks/use-crm-data';
+import { useCRMBookings } from '@/hooks/use-crm-data';
+import Swal from 'sweetalert2';
 import { 
   Calendar,
   Clock,
@@ -50,33 +51,26 @@ export function BookingManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   
-  // Use the CRM search hook to get all bookings
-  const { results: allBookings, loading, error, search } = useCRMSearch();
+  // Use the CRM bookings hook with status filtering
+  const { bookings, loading, error, refetch } = useCRMBookings(statusFilter);
 
-  // Load all bookings on component mount
-  useEffect(() => {
-    search(''); // Empty search to get all bookings
-  }, [search]);
-
-  const displayBookings = allBookings;
-
-  const filteredBookings = displayBookings.filter(booking => 
-    statusFilter === 'all' || booking.status.toLowerCase() === statusFilter
-  );
+  const displayBookings = bookings;
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    const normalizedStatus = status.toLowerCase().replace(/[_-]/g, '');
+    switch (normalizedStatus) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'confirmed':
         return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-      case 'in-progress':
+      case 'inprogress':
         return 'bg-purple-100 text-purple-800';
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
+      case 'noshow':
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -104,6 +98,40 @@ export function BookingManagement() {
   };
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    // Show confirmation dialog with better styling
+    const result = await Swal.fire({
+      title: 'Update Booking Status',
+      text: `Change booking status to ${newStatus}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Update Status',
+      cancelButtonText: 'Cancel',
+      buttonsStyling: true,
+      customClass: {
+        popup: 'swal2-popup-custom',
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom',
+        actions: 'swal2-actions-custom'
+      },
+      didOpen: () => {
+        // Ensure buttons are always visible
+        const popup = Swal.getPopup();
+        if (popup) {
+          popup.style.zIndex = '9999';
+          const actions = popup.querySelector('.swal2-actions');
+          if (actions) {
+            actions.style.display = 'flex';
+            actions.style.gap = '10px';
+            actions.style.justifyContent = 'center';
+          }
+        }
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setUpdatingStatus(bookingId);
     
     try {
@@ -120,20 +148,74 @@ export function BookingManagement() {
         throw new Error('Failed to update booking status');
       }
 
+      Swal.fire({
+        icon: 'success',
+        title: 'Status Updated!',
+        text: `Booking status updated to ${newStatus}`,
+        confirmButtonColor: '#10b981',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
       // Refresh the bookings list
-      search('');
+      refetch();
       
     } catch (error) {
       console.error('Failed to update booking status:', error);
-      alert('Failed to update booking status. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'Failed to update booking status. Please try again.',
+        confirmButtonColor: '#ef4444'
+      });
     } finally {
       setUpdatingStatus(null);
     }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <>
+      <style jsx global>{`
+        .swal2-popup-custom {
+          z-index: 10000 !important;
+        }
+        .swal2-actions-custom {
+          display: flex !important;
+          gap: 10px !important;
+          justify-content: center !important;
+          margin-top: 20px !important;
+        }
+        .swal2-confirm-custom,
+        .swal2-cancel-custom {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 8px 16px !important;
+          border-radius: 6px !important;
+          font-weight: 500 !important;
+          font-size: 14px !important;
+          border: none !important;
+          cursor: pointer !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .swal2-confirm-custom {
+          background-color: #3b82f6 !important;
+          color: white !important;
+        }
+        .swal2-cancel-custom {
+          background-color: #6b7280 !important;
+          color: white !important;
+        }
+        .swal2-confirm-custom:hover {
+          background-color: #2563eb !important;
+        }
+        .swal2-cancel-custom:hover {
+          background-color: #4b5563 !important;
+        }
+      `}</style>
+      <Card className="w-full">
+        <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
@@ -187,7 +269,7 @@ export function BookingManagement() {
 
         {!loading && !error && (
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {filteredBookings.map((booking) => (
+            {displayBookings.map((booking) => (
               <div
                 key={booking.id}
                 className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
@@ -204,11 +286,13 @@ export function BookingManagement() {
                   </div>
                   <div className="flex gap-2">
                     <Badge className={cn('text-xs', getStatusColor(booking.status))}>
-                      {booking.status}
+                      {booking.status.replace(/_/g, ' ').replace(/-/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
                     </Badge>
-                    <Badge className={cn('text-xs', getPaymentStatusColor(booking.paymentStatus))}>
-                      {booking.paymentStatus}
-                    </Badge>
+                    {booking.paymentStatus && booking.paymentStatus !== 'pending' && (
+                      <Badge className={cn('text-xs', getPaymentStatusColor(booking.paymentStatus))}>
+                        Payment: {booking.paymentStatus}
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
@@ -359,7 +443,7 @@ export function BookingManagement() {
               </div>
             ))}
             
-            {filteredBookings.length === 0 && (
+            {displayBookings.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-400" />
                 <p>No bookings found</p>
@@ -375,5 +459,6 @@ export function BookingManagement() {
         )}
       </CardContent>
     </Card>
+    </>
   );
 }
