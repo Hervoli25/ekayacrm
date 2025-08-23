@@ -25,10 +25,8 @@ export async function GET(request: NextRequest) {
     let usersQuery = `
       SELECT 
         u.id,
-        u."firstName",
-        u."lastName",
+        u.name,
         u.email,
-        u.phone,
         u."isActive",
         u."createdAt",
         COUNT(b.id) as total_bookings,
@@ -42,19 +40,17 @@ export async function GET(request: NextRequest) {
 
     if (search.trim()) {
       usersQuery += ` WHERE (
-        UPPER(u."firstName") LIKE UPPER($${paramIndex}) OR
-        UPPER(u."lastName") LIKE UPPER($${paramIndex + 1}) OR
-        UPPER(CONCAT(u."firstName", ' ', u."lastName")) LIKE UPPER($${paramIndex + 2}) OR
-        UPPER(u.email) LIKE UPPER($${paramIndex + 3})
+        UPPER(u.name) LIKE UPPER($${paramIndex}) OR
+        UPPER(u.email) LIKE UPPER($${paramIndex + 1})
       )`;
       
       const searchPattern = `%${search}%`;
-      queryParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
-      paramIndex += 4;
+      queryParams.push(searchPattern, searchPattern);
+      paramIndex += 2;
     }
 
     usersQuery += `
-      GROUP BY u.id, u."firstName", u."lastName", u.email, u.phone, u."isActive", u."createdAt"
+      GROUP BY u.id, u.name, u.email, u."isActive", u."createdAt"
       ORDER BY u."createdAt" DESC
       LIMIT $${paramIndex}
     `;
@@ -65,11 +61,9 @@ export async function GET(request: NextRequest) {
 
     const users = result.rows.map(row => ({
       id: row.id,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      fullName: `${row.firstName} ${row.lastName}`,
+      name: row.name,
+      fullName: row.name || 'Unknown User',
       email: row.email,
-      phone: row.phone || 'N/A',
       isActive: row.isActive,
       totalBookings: parseInt(row.total_bookings) || 0,
       lastBookingDate: row.last_booking_date,

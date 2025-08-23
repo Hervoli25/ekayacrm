@@ -14,6 +14,7 @@
     "db:clean-seed": "npx tsx scripts/clean-seed.ts",
     "db:reset": "npx prisma db push --force-reset && npm run db:clean-seed",
     "db:migrate-roles": "npx tsx scripts/migrate-roles.ts",
+    "points:seed": "npx tsx scripts/seed-points-system.ts",
     "booking:diagnostic": "npx tsx scripts/booking-status-diagnostic.ts",
     "booking:fix": "npx tsx scripts/booking-status-diagnostic.ts -- --fix"
   },

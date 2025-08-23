@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         "lastName", 
         email,
         phone,
+        "loyaltyPoints",
         "createdAt"
       FROM "User"
       ORDER BY "createdAt" DESC
