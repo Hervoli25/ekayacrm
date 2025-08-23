@@ -68,10 +68,34 @@ Thumbs.db
 # Misc
 *.nfs*
 
+# SECURITY: Sensitive files that should NEVER be committed
+fix-security-vulnerabilities.js
+**/fix-security-vulnerabilities.js
+create-admin.ts
+**/create-admin.ts
+**/scripts/create-admin.ts
+
+# Database and security files
+*.sql
+**/*.sql
+!**/schema.sql
+!**/migrations/*.sql
+
 # Markdown files (may contain sensitive information)
 *.md
 **/*.md
 !README.md
+
+# CRITICAL: These specific MD files contain sensitive system info
+SECURITY.md
+DATABASE_SCHEMA.md
+CRM_API_DOCUMENTATION.md
+CRM_INTEGRATION_EXAMPLE.md
+BOOKING_STATUS_DIAGNOSTIC_GUIDE.md
+CRM_INTEGRATION_PROMPT.md
+POINTS_SYSTEM_IMPLEMENTATION_ROADMAP.md
+crm_integration_points_system.md
+points_system_business_rules.md
 
 # Temporary files
 **/nul
